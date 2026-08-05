@@ -217,10 +217,3 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         )
     }
 }
-
-// Configure body parser to handle large files
-export const config = {
-    api: {
-        bodyParser: false,
-    },
-}
