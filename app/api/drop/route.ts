@@ -2,18 +2,83 @@ import { NextRequest, NextResponse } from 'next/server'
 import { filebase } from '@/lib/filebase'
 import { supabase } from '@/lib/supabase'
 import { v7 as uuid } from 'uuid'
+import { PostgrestError } from '@supabase/supabase-js'
 
+// Constants
 const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB
+const ALLOWED_MIME_TYPES = [
+    // Images
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+    // Documents
+    'application/pdf', 'application/msword', 
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    // Text
+    'text/plain', 'text/csv', 'text/html', 'text/css', 'text/javascript',
+    // Archives
+    'application/zip', 'application/x-zip-compressed',
+    'application/x-rar-compressed', 'application/x-7z-compressed',
+    // Audio
+    'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/aac',
+    // Video
+    'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm',
+]
 
-export async function POST(request: NextRequest) {
+// Types
+interface FileMetadata {
+    id: string
+    file_id: string
+    admin_id: string
+    name: string
+    filename: string
+    size: number
+    type: string
+    download_limit: number
+    download_count: number
+    expires_at: string | null
+    password: string | null
+    created_at: string
+    updated_at: string
+}
+
+interface UploadResponse {
+    success: boolean
+    file: {
+        id: string
+        admin_id: string
+        name: string
+        size: number
+        type: string
+        download_limit: number
+        expires_at: string | null
+        created_at: string
+        drop_url: string
+        admin_url: string
+    }
+}
+
+interface UploadError {
+    error: string
+    maxSize?: number
+    fileSize?: number
+    message?: string
+}
+
+export async function POST(request: NextRequest): Promise<NextResponse> {
     try {
-
+        // Parse form data
         const formData = await request.formData()
+        
+        // Get file and metadata
         const file = formData.get('file')
         const downloadLimit = formData.get('downloadLimit')
         const expiresAt = formData.get('expiresAt')
         const password = formData.get('password')
 
+        // Validate file exists
         if (!file || !(file instanceof File)) {
             return NextResponse.json(
                 { error: 'No file provided' },
@@ -21,11 +86,33 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Validate file size
+        if (file.size > MAX_FILE_SIZE) {
+            const errorResponse: UploadError = {
+                error: `File size exceeds ${MAX_FILE_SIZE / 1024 / 1024}MB limit`,
+                maxSize: MAX_FILE_SIZE,
+                fileSize: file.size
+            }
+            return NextResponse.json(errorResponse, { status: 400 })
+        }
+
+        // // Validate file type (optional - remove if you want to accept all files)
+        // if (!ALLOWED_MIME_TYPES.includes(file.type) && !file.type.startsWith('image/')) {
+        //     console.warn(`⚠️ File type not in allowed list: ${file.type}`)
+        //     // Uncomment to reject:
+        //     // return NextResponse.json(
+        //     //     { error: `File type ${file.type} is not allowed` },
+        //     //     { status: 400 }
+        //     // )
+        // }
+
         // Generate unique IDs
         const fileId = uuid()
         const adminId = uuid()
-        const fname = String(file.name)
-        const fileExtension = fname.slice(fname.indexOf('.') + 1)
+        
+        // Get file extension and name
+        const originalName = file.name
+        const fileExtension = originalName.slice(originalName.lastIndexOf('.') + 1)
         const fileName = `${fileId}.${fileExtension}`
 
         // Convert file to buffer
@@ -37,7 +124,7 @@ export async function POST(request: NextRequest) {
             fileName,
             buffer,
             file.type,
-            file.name
+            originalName
         )
 
         if (!uploadResult) {
@@ -47,34 +134,46 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Save metadata to Supabase
-        const metadata = {
+        // Prepare metadata
+        const metadata: FileMetadata = {
             id: uuid(),
             file_id: fileId,
             admin_id: adminId,
-            name: file.name,
+            name: originalName,
             filename: fileName,
             size: file.size,
             type: file.type,
-            download_limit: downloadLimit || 5,
+            download_limit: downloadLimit ? parseInt(downloadLimit.toString(), 10) : 5,
             download_count: 0,
-            expires_at: expiresAt || null,
-            password: password || null,
+            expires_at: expiresAt ? expiresAt.toString() : null,
+            password: password ? password.toString() : null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         }
-        console.log(metadata)
 
-        const { data, error: dbError } = await supabase.client
+        console.log('📝 Metadata:', metadata)
+
+        // Save to Supabase
+        const { data, error: dbError }: { 
+            data: FileMetadata | null, 
+            error: PostgrestError | null 
+        } = await supabase.client
             .from('files')
             .insert(metadata)
             .select()
             .single()
 
         if (dbError) {
-            console.error('Database error:', dbError)
+            console.error('❌ Database error:', dbError)
+            
             // Cleanup: delete from Filebase if database fails
-            await filebase.delete(fileName)
+            try {
+                await filebase.delete(fileName)
+                console.log(`🧹 Cleaned up file: ${fileName}`)
+            } catch (cleanupError) {
+                console.error('❌ Cleanup error:', cleanupError)
+            }
+            
             return NextResponse.json(
                 { error: 'Failed to save file metadata' },
                 { status: 500 }
@@ -85,21 +184,13 @@ export async function POST(request: NextRequest) {
         const dropUrl = `/d/${fileId}`
         const adminUrl = `/admin/${adminId}`
 
-        // // Auto delete
-        // const autodel = setInterval(async ()=>{
-        //     const now = new Date().toISOString()
-        //     if(now >= expiresAt){
-        //         await fetch(`/api/bin?id=${fileId}`, { method: 'DELETE' })
-        //         const clearAutodel = clearInterval(autodel)                
-        //     }
-        // }, 1000)
-
-        return NextResponse.json({
+        // Prepare response
+        const responseData: UploadResponse = {
             success: true,
             file: {
                 id: fileId,
                 admin_id: adminId,
-                name: file.name,
+                name: originalName,
                 size: file.size,
                 type: file.type,
                 download_limit: metadata.download_limit,
@@ -108,13 +199,28 @@ export async function POST(request: NextRequest) {
                 drop_url: dropUrl,
                 admin_url: adminUrl,
             }
-        }, { status: 201 })
+        }
+
+        return NextResponse.json(responseData, { status: 201 })
 
     } catch (error) {
-        console.error('Upload error:', error)
+        console.error('❌ Upload error:', error)
+        
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+        
         return NextResponse.json(
-            { error: 'Upload failed' },
+            { 
+                error: 'Upload failed',
+                message: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+            },
             { status: 500 }
         )
     }
+}
+
+// Configure body parser to handle large files
+export const config = {
+    api: {
+        bodyParser: false,
+    },
 }

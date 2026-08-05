@@ -1,19 +1,63 @@
 import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
+import { PostgrestError } from '@supabase/supabase-js'
 
-export async function GET(request) {
+// Types
+interface FileData {
+    file_id: string
+    admin_id: string
+    name: string
+    filename: string
+    size: number
+    type: string
+    download_limit: number | null
+    download_count: number
+    expires_at: string | null
+    password: string | null
+    created_at: string
+    status: string
+}
+
+interface FileResponse {
+    id: string
+    admin_id: string
+    name: string
+    size: number
+    type: string
+    download_limit: number | null
+    download_count: number
+    expires_at: string | null
+    has_password: boolean
+    created_at: string
+    password?: string
+}
+
+export async function GET(request: Request): Promise<NextResponse> {
     try {
         const { searchParams } = new URL(request.url)
         const id = searchParams.get('id')
 
+        // Validate ID
         if (!id) {
             return NextResponse.json(
-                { error: 'Drop ID is required' },
+                { error: 'Admin ID is required' },
                 { status: 400 }
             )
         }
 
-        const { data: file, error } = await supabase.client
+        // Validate ID format (optional - adjust based on your ID format)
+        if (id.length < 8 || id.length > 64) {
+            return NextResponse.json(
+                { error: 'Invalid admin ID format' },
+                { status: 400 }
+            )
+        }
+
+        // Fetch file from database
+        const { data: file, error }: { 
+            data: FileData | null, 
+            error: PostgrestError | null 
+        } = await supabase.client
             .from('files')
             .select(`
                 file_id,
@@ -32,30 +76,59 @@ export async function GET(request) {
             .eq('admin_id', id)
             .single()
 
-        if (error || !file) {
+        // Handle database errors
+        if (error) {
+            console.error('Database error:', error)
+            
+            // Check if it's a "not found" error
+            if (error.code === 'PGRST116') {
+                return NextResponse.json(
+                    { error: 'Drop not found' },
+                    { status: 404 }
+                )
+            }
+            
+            return NextResponse.json(
+                { error: 'Failed to fetch drop metadata' },
+                { status: 500 }
+            )
+        }
+
+        // Check if file exists
+        if (!file) {
             return NextResponse.json(
                 { error: 'Drop not found' },
                 { status: 404 }
             )
         }
 
-        // Check if expired
+        // Check if file is expired
         if (file.expires_at && new Date(file.expires_at) < new Date()) {
             return NextResponse.json(
-                { error: 'Drop has expired' },
+                { 
+                    error: 'Drop has expired',
+                    expired: true,
+                    expires_at: file.expires_at
+                },
                 { status: 410 }
             )
         }
 
         // Check download limit
-        if (file.download_limit && file.download_count >= file.download_limit) {
+        if (file.download_limit !== null && file.download_count >= file.download_limit) {
             return NextResponse.json(
-                { error: 'Download limit exceeded' },
+                { 
+                    error: 'Download limit exceeded',
+                    download_limit_reached: true,
+                    download_count: file.download_count,
+                    download_limit: file.download_limit
+                },
                 { status: 403 }
             )
         }
 
-        const responseData = {
+        // Prepare response data
+        const responseData: FileResponse = {
             id: file.file_id,
             admin_id: file.admin_id,
             name: file.name,
@@ -66,15 +139,26 @@ export async function GET(request) {
             expires_at: file.expires_at,
             has_password: !!file.password,
             created_at: file.created_at,
-            ...(file.password && { password: file.password }),
         }
 
-        return NextResponse.json(responseData)
+        // Only include password if it exists (for admin view)
+        if (file.password) {
+            responseData.password = file.password
+        }
+
+        return NextResponse.json(responseData, { status: 200 })
 
     } catch (error) {
         console.error('Error fetching drop:', error)
+        
+        // Type-safe error handling
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+        
         return NextResponse.json(
-            { error: 'Failed to fetch drop metadata' },
+            { 
+                error: 'Failed to fetch drop metadata',
+                message: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+            },
             { status: 500 }
         )
     }
