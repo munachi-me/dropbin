@@ -24,7 +24,7 @@ interface UploadResult {
 
 interface DownloadResult {
     success: boolean
-    url?: string
+    url: string
     error?: Error
 }
 
@@ -114,6 +114,7 @@ export const filebase = {
             console.error('Filebase download error:', error)
             return {
                 success: false,
+                url: '',
                 error: error as Error
             }
         }
