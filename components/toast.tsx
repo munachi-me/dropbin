@@ -1,6 +1,12 @@
 // components/Toast.tsx
 "use client"
-import { useState, useEffect, ReactNode } from "react"
+import { 
+    useState, 
+    useEffect, 
+    ReactNode ,
+    createContext, 
+    useContext,
+} from "react"
 import { 
     BsCheck2, 
     BsXCircle, 
@@ -132,8 +138,6 @@ export function useToast() {
 }
 
 // Toast Context for global toast management
-import { createContext, useContext, ReactNode } from 'react'
-
 interface ToastContextType {
     toasts: Toast[]
     addToast: (toast: Omit<Toast, 'id'>) => void
