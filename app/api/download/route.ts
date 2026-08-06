@@ -26,11 +26,6 @@ interface DownloadResponse {
     download_limit: number | null
     remaining_downloads: number | null
 }
-interface DownloadResult {
-    success: boolean
-    url: string
-    error?: Error
-}
 
 export async function GET(request: Request): Promise<NextResponse> {
     try {
@@ -148,10 +143,10 @@ export async function GET(request: Request): Promise<NextResponse> {
         }
 
         // Generate presigned URL from Filebase
-        let presignedUrl: DownloadResult
+        let presignedUrl
         try {
             presignedUrl = await filebase.download(file.filename)
-            if (!presignedUrl.success) {
+            if (!presignedUrl) {
                 throw new Error('Failed to generate presigned URL')
             }
         } catch (urlError) {
@@ -186,7 +181,7 @@ export async function GET(request: Request): Promise<NextResponse> {
 
         // Prepare response
         const responseData: DownloadResponse = {
-            download_url: presignedUrl.url,
+            download_url: presignedUrl,
             filename: file.name,
             file_size: file.size,
             file_type: file.type,
