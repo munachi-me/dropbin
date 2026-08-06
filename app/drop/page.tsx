@@ -443,8 +443,7 @@ export default function Drop() {
                         {files.map((f, i) => (
                             <FileCard 
                                 key={i} 
-                                f={f} 
-                                showMetadata={true}
+                                f={f}
                                 onRemove={() => removeFile(i)}
                             />
                         ))}
