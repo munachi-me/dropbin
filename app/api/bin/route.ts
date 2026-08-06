@@ -91,7 +91,7 @@ export async function DELETE(request: Request): Promise<NextResponse> {
         let filebaseDeleted = false
         try {
             const deleteResult = await filebase.delete(file.filename)
-            if (deleteResult.sucess) {
+            if (deleteResult.success) {
                 filebaseDeleted = true
                 console.log(`✅ File ${file.filename} deleted from Filebase`)
             } else {
