@@ -44,10 +44,10 @@ export default function Footer(){
         <footer className="w-full border-t px-4 pt-12 pb-8 mt-auto flex flex-col gap-8 text-sm">
             <div className="w-full max-w-6xl mx-auto grid grid-cols-3 lg:grid-cols-6 gap-8">
                 <div className="flex flex-col gap-4 font-md col-span-3">
-                    <h3 href="/" className="flex items-center gap-2 text-primary">
+                    <Link href="/" className="flex items-center gap-2 text-primary">
                         <BsCircleFill />
                         <span className="text-foreground font-bold">DropBin</span>
-                    </h3>
+                    </Link>
                     <p className="text-foreground/60 max-w-lg">
                         Share files in seconds. Fast, temporary file sharing, made effortless. 
                         Upload any file via drag or drop, and get a shareable secure link instantly. 
