@@ -39,6 +39,7 @@ function Hero() {
 }
 
 const free = {
+    special: false,
     icon: <BsStars />, name: "Free", desc: "For quick, one-off transfers.",
     price: 0, duration: "/ forever", lk_title: "Start sharing", lk: "/drop",
     specs: [
@@ -49,7 +50,8 @@ const free = {
         "Standard upload speed",
     ],
 };
-const pro = {special: "Most popular",
+const pro = {
+    special: true,
     icon: <BsLightning />, name: "Pro", desc: "For frequent senders who need more.",
     price: 8, duration: "/ per month", lk_title: "Go Pro", lk: "#",
     specs: [
@@ -62,6 +64,7 @@ const pro = {special: "Most popular",
     ],
 };
 const business = {
+    special: false,
     icon: <BsBuildings />, name: "Business", desc: "For teams moving files daily.",
     price: 24, duration: "/ per month", lk_title: "Contact us", lk: "#",
     specs: [
@@ -86,7 +89,7 @@ function Card() {
                         {t.special ? 
                             <span className="absolute text-xs py-2 px-4 w-[60%] rounded-lg bg-primary text-primary-foreground
                             text-center font-semibold top-0 left-[50%] translate-[-50%]">
-                                {t.special}
+                                Popular
                             </span> : null
                         }
                         <div className="flex flex-wrap items-center gap-3">
@@ -213,7 +216,7 @@ const faqs = [
 
 
 function Faq(){
-    const [que, setQue] = useState(null);
+    const [que, setQue] = useState(-1);
 
     return(
         <div id="faqs" className="w-full flex flex-col items-center justify-center gap-4 text-center py-24 px-4
@@ -231,7 +234,7 @@ function Faq(){
 
             <div className="w-full max-w-4xl my-8">
                 {faqs.map((f, i) => (
-                    <button type="button" key={i} onClick={() => i == que ? setQue(null) : setQue(i)}
+                    <button type="button" key={i} onClick={() => i == que ? setQue(-1) : setQue(i)}
                         className="flex flex-col w-full border-b hover:bg-background/50">
                         <p className="flex items-center w-full text-left justify-between p-4 font-semibold">
                             {f.q}
