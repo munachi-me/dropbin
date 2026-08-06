@@ -119,7 +119,7 @@ function Card() {
                         {t.special ? 
                             <span className="absolute text-xs py-2 px-4 w-[60%] rounded-lg bg-primary text-primary-foreground
                             text-center font-semibold top-0 left-[50%] translate-[-50%]">
-                                ⚡ Popular
+                                Popular
                             </span> : null
                         }
                         <div className="flex flex-wrap items-center gap-3">
