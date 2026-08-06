@@ -5,7 +5,7 @@ import {
     BsCloudUpload, BsStars, BsDot,
     BsGear, BsX,
     BsCopy, BsBoxArrowUpRight,
-    BsImage, BsCheckCircle, BsExclamationTriangle,
+    BsFileEarmark, BsCheckCircle, BsExclamationTriangle,
 } from "react-icons/bs"
 import Link from 'next/link'
 import FileCard from '@/components/filecard'
