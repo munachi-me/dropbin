@@ -1,5 +1,5 @@
 "use client"
-import { useRef } from 'react'
+import { useRef, RefObject } from 'react'
 import Link from "next/link"
 import { BsCloudUpload,
     BsLock,
@@ -30,10 +30,10 @@ export default function About() {
 }
 
 function Hero() {
-    const containerRef = useRef(null)
-    const badgeRef = useRef(null)
-    const titleRef = useRef(null)
-    const descRef = useRef(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const badgeRef = useRef<HTMLSpanElement>(null)
+    const titleRef = useRef<HTMLHeadingElement>(null)
+    const descRef = useRef<HTMLParagraphElement>(null)
 
     useGSAP(() => {
         // Create a timeline for hero animations
@@ -63,16 +63,18 @@ function Hero() {
         })
 
         // Parallax effect on scroll
-        gsap.to(containerRef.current, {
-            y: -30,
-            ease: "none",
-            scrollTrigger: {
-                trigger: containerRef.current,
-                start: "top top",
-                end: "bottom top",
-                scrub: 1
-            }
-        })
+        if (containerRef.current) {
+            gsap.to(containerRef.current, {
+                y: -30,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: containerRef.current,
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: 1
+                }
+            })
+        }
 
     }, [])
 
@@ -93,69 +95,75 @@ function Hero() {
 }
 
 function Problem(){
-    const containerRef = useRef(null)
-    const textRef = useRef(null)
-    const imageRef = useRef(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const textRef = useRef<HTMLDivElement>(null)
+    const imageRef = useRef<HTMLDivElement>(null)
 
     useGSAP(() => {
         // Container entrance animation
-        gsap.from(containerRef.current, {
-            opacity: 0,
-            y: 50,
-            duration: 0.8,
-            ease: "power2.out",
-            scrollTrigger: {
-                trigger: containerRef.current,
-                start: "top 80%",
-                toggleActions: "play none none reverse"
-            }
-        })
+        if (containerRef.current) {
+            gsap.from(containerRef.current, {
+                opacity: 0,
+                y: 50,
+                duration: 0.8,
+                ease: "power2.out",
+                scrollTrigger: {
+                    trigger: containerRef.current,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
+                }
+            })
+        }
 
         // Text content with stagger
-        gsap.from(textRef.current.children, {
-            opacity: 0,
-            x: -30,
-            duration: 0.6,
-            stagger: 0.15,
-            ease: "power2.out",
-            scrollTrigger: {
-                trigger: textRef.current,
-                start: "top 80%",
-                toggleActions: "play none none reverse"
-            }
-        })
+        if (textRef.current) {
+            gsap.from(textRef.current.children, {
+                opacity: 0,
+                x: -30,
+                duration: 0.6,
+                stagger: 0.15,
+                ease: "power2.out",
+                scrollTrigger: {
+                    trigger: textRef.current,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
+                }
+            })
+        }
 
         // Image reveal with scale and rotation
-        gsap.from(imageRef.current, {
-            opacity: 0,
-            scale: 0.8,
-            rotationY: 20,
-            duration: 0.8,
-            ease: "back.out(1.7)",
-            scrollTrigger: {
-                trigger: imageRef.current,
-                start: "top 80%",
-                toggleActions: "play none none reverse"
-            }
-        })
+        if (imageRef.current) {
+            gsap.from(imageRef.current, {
+                opacity: 0,
+                scale: 0.8,
+                rotationY: 20,
+                duration: 0.8,
+                ease: "back.out(1.7)",
+                scrollTrigger: {
+                    trigger: imageRef.current,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
+                }
+            })
 
-        // Image hover animation
-        imageRef.current.addEventListener('mouseenter', () => {
-            gsap.to(imageRef.current, {
-                scale: 1.02,
-                rotationY: 5,
-                duration: 0.4,
-                ease: "power2.out"
+            // Image hover animation
+            imageRef.current.addEventListener('mouseenter', () => {
+                gsap.to(imageRef.current, {
+                    scale: 1.02,
+                    rotationY: 5,
+                    duration: 0.4,
+                    ease: "power2.out"
+                })
             })
-        })
-        imageRef.current.addEventListener('mouseleave', () => {
-            gsap.to(imageRef.current, {
-                scale: 1,
-                rotationY: 0,
-                duration: 0.4,
-                ease: "power2.out"
+            imageRef.current.addEventListener('mouseleave', () => {
+                gsap.to(imageRef.current, {
+                    scale: 1,
+                    rotationY: 0,
+                    duration: 0.4,
+                    ease: "power2.out"
+                })
             })
-        })
+        }
 
     }, [])
 
@@ -187,7 +195,13 @@ function Problem(){
     )
 }
 
-const features = [
+interface Feature {
+    icon: React.ReactNode;
+    name: string;
+    desc: string;
+}
+
+const features: Feature[] = [
     {icon: <BsLock />, name: "Privacy", desc: "Your files are not our data. We don't index, profile, or monetize what passes through DropBin."},
     {icon: <BsLightning />, name: "Speed", desc: "Every millisecond is engineered away. Sharing should feel instantaneous, not procedural."},
     {icon: <BsShieldCheck />, name: "Security", desc: "Encryption in transit and at rest, on hardened infrastructure built for fleeting data."},
@@ -196,76 +210,82 @@ const features = [
 ]
 
 function Features(){
-    const containerRef = useRef(null)
-    const featuresRef = useRef([])
-    const titleRef = useRef(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const featuresRef = useRef<(HTMLDivElement | null)[]>([])
+    const titleRef = useRef<HTMLHeadingElement>(null)
 
     useGSAP(() => {
         // Title animation
-        gsap.from(titleRef.current, {
-            opacity: 0,
-            y: 30,
-            duration: 0.6,
-            ease: "power2.out",
-            scrollTrigger: {
-                trigger: titleRef.current,
-                start: "top 80%",
-                toggleActions: "play none none reverse"
-            }
-        })
-
-        // Features grid animation with staggered entrance
-        featuresRef.current.forEach((feature, i) => {
-            gsap.from(feature, {
+        if (titleRef.current) {
+            gsap.from(titleRef.current, {
                 opacity: 0,
-                scale: 0.8,
-                y: 40,
+                y: 30,
                 duration: 0.6,
-                delay: i * 0.12,
-                ease: "back.out(1.7)",
+                ease: "power2.out",
                 scrollTrigger: {
-                    trigger: feature,
-                    start: "top 85%",
+                    trigger: titleRef.current,
+                    start: "top 80%",
                     toggleActions: "play none none reverse"
                 }
             })
-        })
+        }
 
-        // Hover animations with floating effect
-        featuresRef.current.forEach((feature) => {
-            feature.addEventListener('mouseenter', () => {
-                gsap.to(feature, {
-                    y: -8,
-                    scale: 1.03,
-                    boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
-                    duration: 0.3,
-                    ease: "power2.out"
+        // Features grid animation with staggered entrance
+        featuresRef.current.forEach((feature, i) => {
+            if (feature) {
+                gsap.from(feature, {
+                    opacity: 0,
+                    scale: 0.8,
+                    y: 40,
+                    duration: 0.6,
+                    delay: i * 0.12,
+                    ease: "back.out(1.7)",
+                    scrollTrigger: {
+                        trigger: feature,
+                        start: "top 85%",
+                        toggleActions: "play none none reverse"
+                    }
                 })
-                // Animate icon on hover
-                const icon = feature.querySelector('i')
-                gsap.to(icon, {
-                    scale: 1.2,
-                    rotation: 10,
-                    duration: 0.3,
-                    ease: "back.out(1.7)"
+
+                // Hover animations with floating effect
+                feature.addEventListener('mouseenter', () => {
+                    gsap.to(feature, {
+                        y: -8,
+                        scale: 1.03,
+                        boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                        duration: 0.3,
+                        ease: "power2.out"
+                    })
+                    // Animate icon on hover
+                    const icon = feature.querySelector('i')
+                    if (icon) {
+                        gsap.to(icon, {
+                            scale: 1.2,
+                            rotation: 10,
+                            duration: 0.3,
+                            ease: "back.out(1.7)"
+                        })
+                    }
                 })
-            })
-            feature.addEventListener('mouseleave', () => {
-                gsap.to(feature, {
-                    y: 0,
-                    scale: 1,
-                    boxShadow: "0 0 0 rgba(0,0,0,0)",
-                    duration: 0.3,
-                    ease: "power2.out"
+                feature.addEventListener('mouseleave', () => {
+                    gsap.to(feature, {
+                        y: 0,
+                        scale: 1,
+                        boxShadow: "0 0 0 rgba(0,0,0,0)",
+                        duration: 0.3,
+                        ease: "power2.out"
+                    })
+                    const icon = feature.querySelector('i')
+                    if (icon) {
+                        gsap.to(icon, {
+                            scale: 1,
+                            rotation: 0,
+                            duration: 0.3,
+                            ease: "power2.out"
+                        })
+                    }
                 })
-                const icon = feature.querySelector('i')
-                gsap.to(icon, {
-                    scale: 1,
-                    rotation: 0,
-                    duration: 0.3,
-                    ease: "power2.out"
-                })
-            })
+            }
         })
 
     }, [])
@@ -278,22 +298,31 @@ function Features(){
             </h1>
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 w-full max-w-6xl my-8">
                 {features.map((f, i) => (
-                    <div key={i} ref={el => featuresRef.current[i] = el} className="flex items-start flex-col p-4 gap-4 bg-secondary border rounded-lg
-                        shadow-lg hover:border-primary hover:shadow-primary/10">
+                    <div 
+                        key={i} 
+                        ref={el => featuresRef.current[i] = el} 
+                        className="flex items-start flex-col p-4 gap-4 bg-secondary border rounded-lg
+                            shadow-lg hover:border-primary hover:shadow-primary/10"
+                    >
                         <div className="flex w-full justify-between items-center text-xl">
                             <i className="p-4 rounded-sm text-primary bg-primary/10">{f.icon}</i>
                         </div>
                         <h2 className="text-base text-left font-semibold">{f.name}</h2>
                         <p className="text-foreground/60 text-left text-sm">{f.desc}</p>
                     </div>
-
                 ))}
             </div>            
         </div>
     )
 }
 
-const stages = [
+interface Stage {
+    one: string;
+    two: string;
+    three: string;
+}
+
+const stages: Stage[] = [
     {
         one: "Now live",
         two: "The Core Conduit",
@@ -317,82 +346,88 @@ const stages = [
 ]
 
 function RoadMap(){
-    const containerRef = useRef(null)
-    const titleRef = useRef(null)
-    const stagesRef = useRef([])
+    const containerRef = useRef<HTMLDivElement>(null)
+    const titleRef = useRef<HTMLDivElement>(null)
+    const stagesRef = useRef<(HTMLDivElement | null)[]>([])
 
     useGSAP(() => {
         // Title and description animation
-        gsap.from(titleRef.current.children, {
-            opacity: 0,
-            y: 30,
-            duration: 0.6,
-            stagger: 0.15,
-            ease: "power2.out",
-            scrollTrigger: {
-                trigger: titleRef.current,
-                start: "top 80%",
-                toggleActions: "play none none reverse"
-            }
-        })
+        if (titleRef.current) {
+            gsap.from(titleRef.current.children, {
+                opacity: 0,
+                y: 30,
+                duration: 0.6,
+                stagger: 0.15,
+                ease: "power2.out",
+                scrollTrigger: {
+                    trigger: titleRef.current,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
+                }
+            })
+        }
 
         // Stages animation with timeline effect
         stagesRef.current.forEach((stage, i) => {
-            gsap.from(stage, {
-                opacity: 0,
-                x: 50,
-                duration: 0.6,
-                delay: i * 0.15,
-                ease: "power2.out",
-                scrollTrigger: {
-                    trigger: stage,
-                    start: "top 85%",
-                    toggleActions: "play none none reverse"
-                }
-            })
+            if (stage) {
+                gsap.from(stage, {
+                    opacity: 0,
+                    x: 50,
+                    duration: 0.6,
+                    delay: i * 0.15,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: stage,
+                        start: "top 85%",
+                        toggleActions: "play none none reverse"
+                    }
+                })
 
-            // Animate the dot marker
-            const dot = stage.querySelector('i')
-            gsap.from(dot, {
-                scale: 0,
-                rotation: 360,
-                duration: 0.6,
-                delay: i * 0.15 + 0.2,
-                ease: "back.out(1.7)",
-                scrollTrigger: {
-                    trigger: stage,
-                    start: "top 85%",
-                    toggleActions: "play none none reverse"
-                }
-            })
+                // Animate the dot marker
+                const dot = stage.querySelector('i')
+                if (dot) {
+                    gsap.from(dot, {
+                        scale: 0,
+                        rotation: 360,
+                        duration: 0.6,
+                        delay: i * 0.15 + 0.2,
+                        ease: "back.out(1.7)",
+                        scrollTrigger: {
+                            trigger: stage,
+                            start: "top 85%",
+                            toggleActions: "play none none reverse"
+                        }
+                    })
 
-            // Hover animation for stages
-            stage.addEventListener('mouseenter', () => {
-                gsap.to(stage, {
-                    x: 10,
-                    duration: 0.3,
-                    ease: "power2.out"
-                })
-                gsap.to(dot, {
-                    scale: 1.3,
-                    backgroundColor: "rgba(99, 102, 241, 0.2)",
-                    duration: 0.3,
-                    ease: "power2.out"
-                })
-            })
-            stage.addEventListener('mouseleave', () => {
-                gsap.to(stage, {
-                    x: 0,
-                    duration: 0.3,
-                    ease: "power2.out"
-                })
-                gsap.to(dot, {
-                    scale: 1,
-                    backgroundColor: "transparent",
-                    duration: 0.3,
-                    ease: "power2.out"
-                })
-            })
+                    // Hover animation for stages
+                    stage.addEventListener('mouseenter', () => {
+                        gsap.to(stage, {
+                            x: 10,
+                            duration: 0.3,
+                            ease: "power2.out"
+                        })
+                        gsap.to(dot, {
+                            scale: 1.3,
+                            backgroundColor: "rgba(99, 102, 241, 0.2)",
+                            duration: 0.3,
+                            ease: "power2.out"
+                        })
+                    })
+                    stage.addEventListener('mouseleave', () => {
+                        gsap.to(stage, {
+                            x: 0,
+                            duration: 0.3,
+                            ease: "power2.out"
+                        })
+                        gsap.to(dot, {
+                            scale: 1,
+                            backgroundColor: "transparent",
+                            duration: 0.3,
+                            ease: "power2.out"
+                        })
+                    })
+                }
+            }
         })
 
     }, [])
@@ -414,7 +449,11 @@ function RoadMap(){
 
             <div className="col-span-1 lg:col-span-3 flex flex-col gap-4">
                 {stages.map((s, i) => (
-                    <div key={i} ref={el => stagesRef.current[i] = el} className="flex flex-col gap-2 py-4 pr-4 pl-12 hover:bg-secondary rounded-lg relative">
+                    <div 
+                        key={i} 
+                        ref={el => stagesRef.current[i] = el} 
+                        className="flex flex-col gap-2 py-4 pr-4 pl-12 hover:bg-secondary rounded-lg relative"
+                    >
                         <span className="text-xs text-primary mono-font uppercase">{s.one}</span>
                         <h3 className="text-xl font-semibold">{s.two}</h3>
                         <p className="text-sm text-foreground/60">{s.three}</p>
@@ -430,56 +469,60 @@ function RoadMap(){
 }
 
 function Cta(){
-    const containerRef = useRef(null)
-    const ctaRef = useRef(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const ctaRef = useRef<HTMLDivElement>(null)
 
     useGSAP(() => {
         // CTA section animation with floating effect
-        gsap.from(ctaRef.current, {
-            opacity: 0,
-            scale: 0.9,
-            y: 50,
-            duration: 0.8,
-            ease: "back.out(1.7)",
-            scrollTrigger: {
-                trigger: containerRef.current,
-                start: "top 85%",
-                toggleActions: "play none none reverse"
+        if (ctaRef.current) {
+            gsap.from(ctaRef.current, {
+                opacity: 0,
+                scale: 0.9,
+                y: 50,
+                duration: 0.8,
+                ease: "back.out(1.7)",
+                scrollTrigger: {
+                    trigger: containerRef.current,
+                    start: "top 85%",
+                    toggleActions: "play none none reverse"
+                }
+            })
+
+            // Inner elements with stagger
+            gsap.from(ctaRef.current.children, {
+                opacity: 0,
+                y: 30,
+                duration: 0.6,
+                stagger: 0.15,
+                ease: "power2.out",
+                scrollTrigger: {
+                    trigger: ctaRef.current,
+                    start: "top 85%",
+                    toggleActions: "play none none reverse"
+                }
+            })
+
+            // Pulse animation for the button
+            const button = ctaRef.current.querySelector('a')
+            if (button) {
+                gsap.to(button, {
+                    scale: 1.05,
+                    boxShadow: "0 10px 30px rgba(99, 102, 241, 0.3)",
+                    duration: 1.5,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "sine.inOut"
+                })
             }
-        })
 
-        // Inner elements with stagger
-        gsap.from(ctaRef.current.children, {
-            opacity: 0,
-            y: 30,
-            duration: 0.6,
-            stagger: 0.15,
-            ease: "power2.out",
-            scrollTrigger: {
-                trigger: ctaRef.current,
-                start: "top 85%",
-                toggleActions: "play none none reverse"
-            }
-        })
-
-        // Pulse animation for the button
-        const button = ctaRef.current.querySelector('a')
-        gsap.to(button, {
-            scale: 1.05,
-            boxShadow: "0 10px 30px rgba(99, 102, 241, 0.3)",
-            duration: 1.5,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut"
-        })
-
-        // Background gradient animation
-        gsap.to(ctaRef.current, {
-            backgroundPosition: "200% 200%",
-            duration: 10,
-            repeat: -1,
-            ease: "sine.inOut"
-        })
+            // Background gradient animation
+            gsap.to(ctaRef.current, {
+                backgroundPosition: "200% 200%",
+                duration: 10,
+                repeat: -1,
+                ease: "sine.inOut"
+            })
+        }
 
     }, [])
 
@@ -501,7 +544,6 @@ function Cta(){
                 hover:bg-accent hover:text-accent-foreground">
                     <BsCloudUpload /> Drop files 
                 </Link>
-
             </div>  
         </div>
     )

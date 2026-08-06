@@ -26,10 +26,10 @@ export default function Pricing() {
 }
 
 function Hero() {
-    const containerRef = useRef(null)
-    const badgeRef = useRef(null)
-    const titleRef = useRef(null)
-    const descRef = useRef(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const badgeRef = useRef<HTMLSpanElement>(null)
+    const titleRef = useRef<HTMLHeadingElement>(null)
+    const descRef = useRef<HTMLParagraphElement>(null)
 
     useGSAP(() => {
         // Create a timeline for hero animations
@@ -38,37 +38,45 @@ function Hero() {
         })
 
         // Animate badge
-        tl.from(badgeRef.current, {
-            opacity: 0,
-            y: -30,
-            duration: 0.6
-        })
+        if (badgeRef.current) {
+            tl.from(badgeRef.current, {
+                opacity: 0,
+                y: -30,
+                duration: 0.6
+            })
+        }
         // Animate title with stagger effect
-        .from(titleRef.current, {
-            opacity: 0,
-            y: 50,
-            duration: 0.8,
-            scale: 0.9,
-            rotationX: 10
-        })
+        if (titleRef.current) {
+            tl.from(titleRef.current, {
+                opacity: 0,
+                y: 50,
+                duration: 0.8,
+                scale: 0.9,
+                rotationX: 10
+            })
+        }
         // Animate description
-        .from(descRef.current, {
-            opacity: 0,
-            y: 30,
-            duration: 0.6
-        })
+        if (descRef.current) {
+            tl.from(descRef.current, {
+                opacity: 0,
+                y: 30,
+                duration: 0.6
+            })
+        }
 
         // Parallax effect on scroll
-        gsap.to(containerRef.current, {
-            y: -30,
-            ease: "none",
-            scrollTrigger: {
-                trigger: containerRef.current,
-                start: "top top",
-                end: "bottom top",
-                scrub: 1
-            }
-        })
+        if (containerRef.current) {
+            gsap.to(containerRef.current, {
+                y: -30,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: containerRef.current,
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: 1
+                }
+            })
+        }
 
     }, [])
 
@@ -88,10 +96,27 @@ function Hero() {
     )
 }
 
-const free = {
+interface Tier {
+    special: boolean;
+    icon: React.ReactNode;
+    name: string;
+    desc: string;
+    price: number;
+    duration: string;
+    lk_title: string;
+    lk: string;
+    specs: string[];
+}
+
+const free: Tier = {
     special: false,
-    icon: <BsStars />, name: "Free", desc: "For quick, one-off transfers.",
-    price: 0, duration: "/ forever", lk_title: "Start sharing", lk: "/drop",
+    icon: <BsStars />, 
+    name: "Free", 
+    desc: "For quick, one-off transfers.",
+    price: 0, 
+    duration: "/ forever", 
+    lk_title: "Start sharing", 
+    lk: "/drop",
     specs: [
         "100 MB max file size",
         "Up to 24 hours storage",
@@ -100,10 +125,16 @@ const free = {
         "Standard upload speed",
     ],
 };
-const pro = {
+
+const pro: Tier = {
     special: true,
-    icon: <BsLightning />, name: "Pro", desc: "For frequent senders who need more.",
-    price: 8, duration: "/ per month", lk_title: "Go Pro", lk: "#",
+    icon: <BsLightning />, 
+    name: "Pro", 
+    desc: "For frequent senders who need more.",
+    price: 8, 
+    duration: "/ per month", 
+    lk_title: "Go Pro", 
+    lk: "#",
     specs: [
         "2 GB max file size",
         "Up to 14 days storage",
@@ -113,10 +144,16 @@ const pro = {
         "Download analytics",
     ],
 };
-const business = {
+
+const business: Tier = {
     special: false,
-    icon: <BsBuildings />, name: "Business", desc: "For teams moving files daily.",
-    price: 24, duration: "/ per month", lk_title: "Contact us", lk: "#",
+    icon: <BsBuildings />, 
+    name: "Business", 
+    desc: "For teams moving files daily.",
+    price: 24, 
+    duration: "/ per month", 
+    lk_title: "Contact us", 
+    lk: "#",
     specs: [
         "10 GB max file size",
         "Up to 30 days storage",
@@ -127,89 +164,108 @@ const business = {
     ],
 };
 
-const tiers = [free, pro, business]
+const tiers: Tier[] = [free, pro, business]
 
 function Card() {
-    const containerRef = useRef(null)
-    const cardsRef = useRef([])
-    const popularRef = useRef(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const cardsRef = useRef<(HTMLDivElement | null)[]>([])
+    const popularRef = useRef<HTMLDivElement | null>(null)
 
     useGSAP(() => {
         // Card entrance animations with stagger
         cardsRef.current.forEach((card, i) => {
-            gsap.from(card, {
-                opacity: 0,
-                y: 60,
-                scale: 0.95,
-                duration: 0.8,
-                delay: i * 0.15,
-                ease: "back.out(1.7)",
-                scrollTrigger: {
-                    trigger: card,
-                    start: "top 85%",
-                    toggleActions: "play none none reverse"
-                }
-            })
-        })
-
-        // Hover animations for cards
-        cardsRef.current.forEach((card) => {
-            card.addEventListener('mouseenter', () => {
-                gsap.to(card, {
-                    y: -10,
-                    scale: 1.02,
-                    boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
-                    duration: 0.3,
-                    ease: "power2.out"
-                })
-                
-                // Animate icon on hover
-                const icon = card.querySelector('i')
-                gsap.to(icon, {
-                    scale: 1.2,
-                    rotation: 10,
-                    duration: 0.3,
-                    ease: "back.out(1.7)"
+            if (card) {
+                gsap.from(card, {
+                    opacity: 0,
+                    y: 60,
+                    scale: 0.95,
+                    duration: 0.8,
+                    delay: i * 0.15,
+                    ease: "back.out(1.7)",
+                    scrollTrigger: {
+                        trigger: card,
+                        start: "top 85%",
+                        toggleActions: "play none none reverse"
+                    }
                 })
 
-                // Animate specs on hover
-                const specs = card.querySelectorAll('.spec-item')
-                specs.forEach((spec, idx) => {
-                    gsap.to(spec, {
-                        x: 5,
-                        duration: 0.2,
-                        delay: idx * 0.05,
+                // Hover animations for cards
+                card.addEventListener('mouseenter', () => {
+                    gsap.to(card, {
+                        y: -10,
+                        scale: 1.02,
+                        boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+                        duration: 0.3,
                         ease: "power2.out"
                     })
-                })
-            })
-            
-            card.addEventListener('mouseleave', () => {
-                gsap.to(card, {
-                    y: 0,
-                    scale: 1,
-                    boxShadow: "0 0 0 rgba(0,0,0,0)",
-                    duration: 0.3,
-                    ease: "power2.out"
-                })
-                
-                const icon = card.querySelector('i')
-                gsap.to(icon, {
-                    scale: 1,
-                    rotation: 0,
-                    duration: 0.3,
-                    ease: "power2.out"
-                })
+                    
+                    // Animate icon on hover
+                    const icon = card.querySelector('i')
+                    if (icon) {
+                        gsap.to(icon, {
+                            scale: 1.2,
+                            rotation: 10,
+                            duration: 0.3,
+                            ease: "back.out(1.7)"
+                        })
+                    }
 
-                const specs = card.querySelectorAll('.spec-item')
-                specs.forEach((spec) => {
-                    gsap.to(spec, {
-                        x: 0,
-                        duration: 0.2,
-                        ease: "power2.out"
+                    // Animate specs on hover
+                    const specs = card.querySelectorAll('.spec-item')
+                    specs.forEach((spec, idx) => {
+                        gsap.to(spec, {
+                            x: 5,
+                            duration: 0.2,
+                            delay: idx * 0.05,
+                            ease: "power2.out"
+                        })
                     })
                 })
-            })
+                
+                card.addEventListener('mouseleave', () => {
+                    gsap.to(card, {
+                        y: 0,
+                        scale: 1,
+                        boxShadow: "0 0 0 rgba(0,0,0,0)",
+                        duration: 0.3,
+                        ease: "power2.out"
+                    })
+                    
+                    const icon = card.querySelector('i')
+                    if (icon) {
+                        gsap.to(icon, {
+                            scale: 1,
+                            rotation: 0,
+                            duration: 0.3,
+                            ease: "power2.out"
+                        })
+                    }
+
+                    const specs = card.querySelectorAll('.spec-item')
+                    specs.forEach((spec) => {
+                        gsap.to(spec, {
+                            x: 0,
+                            duration: 0.2,
+                            ease: "power2.out"
+                        })
+                    })
+                })
+
+                // Animate checkmarks with stagger
+                const checkmarks = card.querySelectorAll('.checkmark')
+                gsap.from(checkmarks, {
+                    opacity: 0,
+                    scale: 0,
+                    duration: 0.4,
+                    stagger: 0.08,
+                    ease: "back.out(1.7)",
+                    scrollTrigger: {
+                        trigger: card,
+                        start: "top 80%",
+                        toggleActions: "play none none reverse"
+                    }
+                })
+            }
         })
 
         // Special glow animation for Pro card
@@ -223,34 +279,21 @@ function Card() {
             })
         }
 
-        // Animate checkmarks with stagger
-        cardsRef.current.forEach((card) => {
-            const checkmarks = card.querySelectorAll('.checkmark')
-            gsap.from(checkmarks, {
-                opacity: 0,
-                scale: 0,
-                duration: 0.4,
-                stagger: 0.08,
-                ease: "back.out(1.7)",
-                scrollTrigger: {
-                    trigger: card,
-                    start: "top 80%",
-                    toggleActions: "play none none reverse"
-                }
-            })
-        })
-
     }, [])
 
     return(
         <div ref={containerRef} className="w-full flex flex-col items-center justify-center gap-4 py-24 px-4">
             <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 p-4 gap-8">
                 {tiers.map((t, i) => (
-                    <div key={i} ref={el => {
-                        cardsRef.current[i] = el
-                        if (t.special) popularRef.current = el
-                    }} className={`flex flex-col p-8 gap-8 rounded-2xl border relative shadow-lg bg-secondary/50
-                    ${t.special ? 'glow' : ''}`}>
+                    <div 
+                        key={i} 
+                        ref={el => {
+                            cardsRef.current[i] = el
+                            if (t.special) popularRef.current = el
+                        }} 
+                        className={`flex flex-col p-8 gap-8 rounded-2xl border relative shadow-lg bg-secondary/50
+                        ${t.special ? 'glow' : ''}`}
+                    >
                         {t.special ? 
                             <span className="absolute text-xs py-2 px-4 w-[60%] rounded-lg bg-primary text-primary-foreground
                             text-center font-semibold top-0 left-[50%] translate-[-50%]">
@@ -290,7 +333,14 @@ function Card() {
     )
 }
 
-const table = [
+interface TableRow {
+    feature: string;
+    free: string;
+    pro: string;
+    business: string;
+}
+
+const table: TableRow[] = [
     {feature: 'Maximum upload size', free: '100 MB', pro: '2 GB', business: '10 GB'},
     {feature: 'Storage duration', free: '7 days', pro: '30 days', business: '30 days'},
     {feature: 'Download limit', free: '5', pro: '50', business: 'Unlimited'},
@@ -301,87 +351,93 @@ const table = [
 ]
 
 function Compare(){
-    const containerRef = useRef(null)
-    const tableRef = useRef(null)
-    const rowsRef = useRef([])
-    const headerRef = useRef(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const tableRef = useRef<HTMLTableElement>(null)
+    const rowsRef = useRef<(HTMLTableRowElement | null)[]>([])
+    const headerRef = useRef<HTMLTableRowElement>(null)
 
     useGSAP(() => {
         // Header animation
-        gsap.from(containerRef.current.children, {
-            opacity: 0,
-            y: 30,
-            duration: 0.6,
-            stagger: 0.15,
-            ease: "power2.out",
-            scrollTrigger: {
-                trigger: containerRef.current,
-                start: "top 80%",
-                toggleActions: "play none none reverse"
-            }
-        })
-
-        // Table reveal animation
-        gsap.from(tableRef.current, {
-            opacity: 0,
-            scale: 0.95,
-            duration: 0.8,
-            ease: "power2.out",
-            scrollTrigger: {
-                trigger: tableRef.current,
-                start: "top 80%",
-                toggleActions: "play none none reverse"
-            }
-        })
-
-        // Table rows stagger animation
-        rowsRef.current.forEach((row, i) => {
-            gsap.from(row, {
+        if (containerRef.current) {
+            gsap.from(containerRef.current.children, {
                 opacity: 0,
-                x: -40,
-                duration: 0.5,
-                delay: i * 0.08,
+                y: 30,
+                duration: 0.6,
+                stagger: 0.15,
                 ease: "power2.out",
                 scrollTrigger: {
-                    trigger: row,
-                    start: "top 90%",
+                    trigger: containerRef.current,
+                    start: "top 80%",
                     toggleActions: "play none none reverse"
                 }
             })
+        }
 
-            // Hover effect for rows
-            row.addEventListener('mouseenter', () => {
-                gsap.to(row, {
-                    backgroundColor: "rgba(99, 102, 241, 0.05)",
-                    duration: 0.2,
-                    ease: "power2.out"
-                })
-            })
-            row.addEventListener('mouseleave', () => {
-                gsap.to(row, {
-                    backgroundColor: "transparent",
-                    duration: 0.2,
-                    ease: "power2.out"
-                })
-            })
-        })
-
-        // Pro column highlight animation
-        const proCells = tableRef.current.querySelectorAll('td:nth-child(3)')
-        proCells.forEach((cell) => {
-            gsap.from(cell, {
-                scale: 0.8,
+        // Table reveal animation
+        if (tableRef.current) {
+            gsap.from(tableRef.current, {
                 opacity: 0,
-                duration: 0.6,
-                stagger: 0.1,
-                ease: "back.out(1.7)",
+                scale: 0.95,
+                duration: 0.8,
+                ease: "power2.out",
                 scrollTrigger: {
-                    trigger: cell,
-                    start: "top 90%",
+                    trigger: tableRef.current,
+                    start: "top 80%",
                     toggleActions: "play none none reverse"
                 }
             })
-        })
+
+            // Table rows stagger animation
+            rowsRef.current.forEach((row, i) => {
+                if (row) {
+                    gsap.from(row, {
+                        opacity: 0,
+                        x: -40,
+                        duration: 0.5,
+                        delay: i * 0.08,
+                        ease: "power2.out",
+                        scrollTrigger: {
+                            trigger: row,
+                            start: "top 90%",
+                            toggleActions: "play none none reverse"
+                        }
+                    })
+
+                    // Hover effect for rows
+                    row.addEventListener('mouseenter', () => {
+                        gsap.to(row, {
+                            backgroundColor: "rgba(99, 102, 241, 0.05)",
+                            duration: 0.2,
+                            ease: "power2.out"
+                        })
+                    })
+                    row.addEventListener('mouseleave', () => {
+                        gsap.to(row, {
+                            backgroundColor: "transparent",
+                            duration: 0.2,
+                            ease: "power2.out"
+                        })
+                    })
+                }
+            })
+
+            // Pro column highlight animation
+            const proCells = tableRef.current.querySelectorAll('td:nth-child(3)')
+            proCells.forEach((cell) => {
+                gsap.from(cell, {
+                    scale: 0.8,
+                    opacity: 0,
+                    duration: 0.6,
+                    stagger: 0.1,
+                    ease: "back.out(1.7)",
+                    scrollTrigger: {
+                        trigger: cell,
+                        start: "top 90%",
+                        toggleActions: "play none none reverse"
+                    }
+                })
+            })
+        }
 
     }, [])
 
@@ -437,7 +493,12 @@ function Compare(){
     )
 }
 
-const faqs = [
+interface FAQ {
+    q: string;
+    a: string;
+}
+
+const faqs: FAQ[] = [
     {
         q: "Can I change plans anytime?",
         a: "Yes — upgrade or downgrade in a click. Changes apply immediately and we prorate the difference automatically."
@@ -457,56 +518,61 @@ const faqs = [
 ]
 
 function Faq(){
-    const [que, setQue] = useState(-1);
-    const containerRef = useRef(null)
-    const faqRef = useRef([])
-    const contentRef = useRef([])
+    const [que, setQue] = useState<number>(-1);
+    const containerRef = useRef<HTMLDivElement>(null)
+    const faqRef = useRef<(HTMLButtonElement | null)[]>([])
+    const contentRef = useRef<(HTMLParagraphElement | null)[]>([])
+    const [isAnimating, setIsAnimating] = useState<boolean>(false)
 
     useGSAP(() => {
         // Header animation
-        gsap.from(containerRef.current.children, {
-            opacity: 0,
-            y: 30,
-            duration: 0.6,
-            stagger: 0.15,
-            ease: "power2.out",
-            scrollTrigger: {
-                trigger: containerRef.current,
-                start: "top 80%",
-                toggleActions: "play none none reverse"
-            }
-        })
-
-        // FAQ items animation
-        faqRef.current.forEach((item, i) => {
-            gsap.from(item, {
+        if (containerRef.current) {
+            gsap.from(containerRef.current.children, {
                 opacity: 0,
-                x: -30,
-                duration: 0.5,
-                delay: i * 0.1,
+                y: 30,
+                duration: 0.6,
+                stagger: 0.15,
                 ease: "power2.out",
                 scrollTrigger: {
-                    trigger: item,
-                    start: "top 85%",
+                    trigger: containerRef.current,
+                    start: "top 80%",
                     toggleActions: "play none none reverse"
                 }
             })
+        }
 
-            // Hover effect for FAQ items
-            item.addEventListener('mouseenter', () => {
-                gsap.to(item, {
-                    x: 10,
-                    duration: 0.2,
-                    ease: "power2.out"
+        // FAQ items animation
+        faqRef.current.forEach((item, i) => {
+            if (item) {
+                gsap.from(item, {
+                    opacity: 0,
+                    x: -30,
+                    duration: 0.5,
+                    delay: i * 0.1,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: item,
+                        start: "top 85%",
+                        toggleActions: "play none none reverse"
+                    }
                 })
-            })
-            item.addEventListener('mouseleave', () => {
-                gsap.to(item, {
-                    x: 0,
-                    duration: 0.2,
-                    ease: "power2.out"
+
+                // Hover effect for FAQ items
+                item.addEventListener('mouseenter', () => {
+                    gsap.to(item, {
+                        x: 10,
+                        duration: 0.2,
+                        ease: "power2.out"
+                    })
                 })
-            })
+                item.addEventListener('mouseleave', () => {
+                    gsap.to(item, {
+                        x: 0,
+                        duration: 0.2,
+                        ease: "power2.out"
+                    })
+                })
+            }
         })
 
     }, [])
@@ -514,12 +580,14 @@ function Faq(){
     // Animate FAQ content when toggled
     useEffect(() => {
         if (que !== -1 && contentRef.current[que]) {
+            setIsAnimating(true)
             gsap.from(contentRef.current[que], {
                 opacity: 0,
                 height: 0,
                 duration: 0.4,
                 ease: "power2.out",
-                clearProps: "height"
+                clearProps: "height",
+                onComplete: () => setIsAnimating(false)
             })
         }
     }, [que])
@@ -540,15 +608,24 @@ function Faq(){
 
             <div className="w-full max-w-4xl my-8">
                 {faqs.map((f, i) => (
-                    <button type="button" key={i} ref={el => faqRef.current[i] = el}
+                    <button 
+                        type="button" 
+                        key={i} 
+                        ref={el => faqRef.current[i] = el}
                         onClick={() => i == que ? setQue(-1) : setQue(i)}
-                        className="flex flex-col w-full border-b hover:bg-background/50">
+                        className="flex flex-col w-full border-b hover:bg-background/50"
+                        disabled={isAnimating}
+                    >
                         <p className="flex items-center w-full text-left justify-between p-4 font-semibold">
                             {f.q}
-                            <i>{i == que ? <BsChevronUp /> : <BsChevronDown />}</i>
+                            <i className="transition-transform duration-300" style={{ transform: i === que ? 'rotate(180deg)' : 'rotate(0)' }}>
+                                {i == que ? <BsChevronUp /> : <BsChevronDown />}
+                            </i>
                         </p>
-                        <p ref={el => contentRef.current[i] = el}
-                            className={`${i == que ? 'block' : 'hidden'} text-left px-4 pb-4 w-full text-foreground/60`}>
+                        <p 
+                            ref={el => contentRef.current[i] = el}
+                            className={`${i == que ? 'block' : 'hidden'} text-left px-4 pb-4 w-full text-foreground/60`}
+                        >
                             {f.a}
                         </p>
                         
@@ -561,56 +638,60 @@ function Faq(){
 }
 
 function Cta(){
-    const containerRef = useRef(null)
-    const ctaRef = useRef(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const ctaRef = useRef<HTMLDivElement>(null)
 
     useGSAP(() => {
         // CTA section animation with floating effect
-        gsap.from(ctaRef.current, {
-            opacity: 0,
-            scale: 0.9,
-            y: 50,
-            duration: 0.8,
-            ease: "back.out(1.7)",
-            scrollTrigger: {
-                trigger: containerRef.current,
-                start: "top 85%",
-                toggleActions: "play none none reverse"
+        if (ctaRef.current) {
+            gsap.from(ctaRef.current, {
+                opacity: 0,
+                scale: 0.9,
+                y: 50,
+                duration: 0.8,
+                ease: "back.out(1.7)",
+                scrollTrigger: {
+                    trigger: containerRef.current,
+                    start: "top 85%",
+                    toggleActions: "play none none reverse"
+                }
+            })
+
+            // Inner elements with stagger
+            gsap.from(ctaRef.current.children, {
+                opacity: 0,
+                y: 30,
+                duration: 0.6,
+                stagger: 0.15,
+                ease: "power2.out",
+                scrollTrigger: {
+                    trigger: ctaRef.current,
+                    start: "top 85%",
+                    toggleActions: "play none none reverse"
+                }
+            })
+
+            // Pulse animation for the button
+            const button = ctaRef.current.querySelector('a')
+            if (button) {
+                gsap.to(button, {
+                    scale: 1.05,
+                    boxShadow: "0 10px 30px rgba(99, 102, 241, 0.3)",
+                    duration: 1.5,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "sine.inOut"
+                })
             }
-        })
 
-        // Inner elements with stagger
-        gsap.from(ctaRef.current.children, {
-            opacity: 0,
-            y: 30,
-            duration: 0.6,
-            stagger: 0.15,
-            ease: "power2.out",
-            scrollTrigger: {
-                trigger: ctaRef.current,
-                start: "top 85%",
-                toggleActions: "play none none reverse"
-            }
-        })
-
-        // Pulse animation for the button
-        const button = ctaRef.current.querySelector('a')
-        gsap.to(button, {
-            scale: 1.05,
-            boxShadow: "0 10px 30px rgba(99, 102, 241, 0.3)",
-            duration: 1.5,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut"
-        })
-
-        // Background gradient animation
-        gsap.to(ctaRef.current, {
-            backgroundPosition: "200% 200%",
-            duration: 10,
-            repeat: -1,
-            ease: "sine.inOut"
-        })
+            // Background gradient animation
+            gsap.to(ctaRef.current, {
+                backgroundPosition: "200% 200%",
+                duration: 10,
+                repeat: -1,
+                ease: "sine.inOut"
+            })
+        }
 
     }, [])
 
