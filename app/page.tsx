@@ -2,7 +2,6 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from "next/link"
 import { BsCloudUpload, BsTags, BsCircleFill,
-    BsFileEarmarkPdf,
     BsClock,
     BsCloudDownload, BsLock,
     BsShare, BsDot,
@@ -16,7 +15,6 @@ import { BsCloudUpload, BsTags, BsCircleFill,
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import Loading from '@/components/loading'
 import FileCard from '@/components/filecard'
 
 // Register ScrollTrigger plugin
@@ -50,25 +48,33 @@ function Hero() {
         })
 
         // Animate badge with bounce
-        tl.fromTo(badgeRef.current, 
-            { opacity: 0, y: -20, scale: 0.8 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.6 }
-        )
+        if (badgeRef.current) {
+            tl.fromTo(badgeRef.current, 
+                { opacity: 0, y: -20, scale: 0.8 },
+                { opacity: 1, y: 0, scale: 1, duration: 0.6 }
+            )
+        }
         // Animate title with stagger
-        .fromTo(titleRef.current?.children, 
-            { opacity: 0, y: 30 },
-            { opacity: 1, y: 0, duration: 0.8, stagger: 0.1 }
-        )
+        if (titleRef.current) {
+            tl.fromTo(titleRef.current?.children, 
+                { opacity: 0, y: 30 },
+                { opacity: 1, y: 0, duration: 0.8, stagger: 0.1 }
+            )
+        }
         // Animate description
-        .fromTo(descRef.current, 
-            { opacity: 0, y: 20 },
-            { opacity: 1, y: 0, duration: 0.6 }
-        )
+        if (descRef.current) {
+            tl.fromTo(descRef.current, 
+                { opacity: 0, y: 20 },
+                { opacity: 1, y: 0, duration: 0.6 }
+            )
+        }
         // Animate buttons with stagger
-        .fromTo(buttonsRef.current?.children, 
-            { opacity: 0, y: 20, scale: 0.9 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.15 }
-        )
+        if (buttonsRef.current) {
+            tl.fromTo(buttonsRef.current?.children, 
+                { opacity: 0, y: 20, scale: 0.9 },
+                { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.15 }
+            )
+        }
     }, [])
 
     return(
@@ -115,37 +121,41 @@ function Card() {
 
     useGSAP(() => {
         // Animate card entrance
-        gsap.fromTo(cardRef.current, 
-            { opacity: 0, y: 50, scale: 0.95 },
-            { 
-                opacity: 1, 
-                y: 0, 
-                scale: 1, 
-                duration: 1,
-                ease: "power3.out",
-                scrollTrigger: {
-                    trigger: cardRef.current,
-                    start: "top 85%",
-                    toggleActions: "play none none none"
+        if (cardRef.current) {
+            gsap.fromTo(cardRef.current, 
+                { opacity: 0, y: 50, scale: 0.95 },
+                { 
+                    opacity: 1, 
+                    y: 0, 
+                    scale: 1, 
+                    duration: 1,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: cardRef.current,
+                        start: "top 85%",
+                        toggleActions: "play none none none"
+                    }
                 }
-            }
-        )
+            )
+        }
 
         // Animate progress bar
-        gsap.fromTo(progressRef.current,
-            { width: "0%" },
-            { 
-                width: "100%", 
-                duration: 2, 
-                delay: 1,
-                ease: "power2.inOut",
-                scrollTrigger: {
-                    trigger: progressRef.current,
-                    start: "top 85%",
-                    toggleActions: "play none none none"
+        if (progressRef.current) {
+            gsap.fromTo(progressRef.current,
+                { width: "0%" },
+                { 
+                    width: "100%", 
+                    duration: 2, 
+                    delay: 1,
+                    ease: "power2.inOut",
+                    scrollTrigger: {
+                        trigger: progressRef.current,
+                        start: "top 85%",
+                        toggleActions: "play none none none"
+                    }
                 }
-            }
-        )
+            )
+        }
     }, [])
 
     return(
@@ -201,22 +211,24 @@ function Step(){
 
     useGSAP(() => {
         // Animate step cards with stagger
-        gsap.fromTo(stepCardsRef.current, 
-            { opacity: 0, y: 40, scale: 0.9 },
-            { 
-                opacity: 1, 
-                y: 0, 
-                scale: 1, 
-                duration: 0.8,
-                stagger: 0.2,
-                ease: "back.out(1.7)",
-                scrollTrigger: {
-                    trigger: stepRef.current,
-                    start: "top 80%",
-                    toggleActions: "play none none none"
+        if (stepCardsRef.current) {
+            gsap.fromTo(stepCardsRef.current, 
+                { opacity: 0, y: 40, scale: 0.9 },
+                { 
+                    opacity: 1, 
+                    y: 0, 
+                    scale: 1, 
+                    duration: 0.8,
+                    stagger: 0.2,
+                    ease: "back.out(1.7)",
+                    scrollTrigger: {
+                        trigger: stepRef.current,
+                        start: "top 80%",
+                        toggleActions: "play none none none"
+                    }
                 }
-            }
-        )
+            )
+        }
 
         // Hover animation for each card
         stepCardsRef.current.forEach((card) => {
@@ -258,7 +270,7 @@ function Step(){
                 {steps.map((s, i) => (
                     <div 
                         key={i} 
-                        ref={el => stepCardsRef.current[i] = el}
+                        ref={el => { stepCardsRef.current[i] = el; }}
                         className="flex items-start flex-col p-4 gap-4 bg-secondary border rounded-lg
                         shadow-lg hover:border-primary hover:shadow-primary/10 hover:translate-y-[-3px]"
                     >
@@ -292,25 +304,27 @@ function Features(){
 
     useGSAP(() => {
         // Animate feature cards with alternating stagger
-        gsap.fromTo(featureCardsRef.current, 
-            { opacity: 0, scale: 0.8, rotation: 2 },
-            { 
-                opacity: 1, 
-                scale: 1, 
-                rotation: 0,
-                duration: 0.7,
-                stagger: {
-                    amount: 0.5,
-                    from: "center"
-                },
-                ease: "back.out(1.5)",
-                scrollTrigger: {
-                    trigger: featuresRef.current,
-                    start: "top 80%",
-                    toggleActions: "play none none none"
+        if (featureCardsRef.current) {
+            gsap.fromTo(featureCardsRef.current, 
+                { opacity: 0, scale: 0.8, rotation: 2 },
+                { 
+                    opacity: 1, 
+                    scale: 1, 
+                    rotation: 0,
+                    duration: 0.7,
+                    stagger: {
+                        amount: 0.5,
+                        from: "center"
+                    },
+                    ease: "back.out(1.5)",
+                    scrollTrigger: {
+                        trigger: featuresRef.current,
+                        start: "top 80%",
+                        toggleActions: "play none none none"
+                    }
                 }
-            }
-        )
+            )
+        }
 
         // Add hover animations
         featureCardsRef.current.forEach((card) => {
@@ -353,7 +367,7 @@ function Features(){
                 {features.map((f, i) => (
                     <div 
                         key={i} 
-                        ref={el => featureCardsRef.current[i] = el}
+                        ref={el => { featureCardsRef.current[i] = el; }}
                         className="flex items-start flex-col p-4 gap-4 bg-secondary border rounded-lg
                         shadow-lg hover:border-primary hover:shadow-primary/10 hover:translate-y-[-3px]"
                     >
@@ -386,22 +400,24 @@ function Why(){
 
     useGSAP(() => {
         // Animate table rows
-        const rows = tableRef.current?.querySelectorAll('tr')
-        gsap.fromTo(rows, 
-            { opacity: 0, x: -20 },
-            { 
-                opacity: 1, 
-                x: 0, 
-                duration: 0.4,
-                stagger: 0.08,
-                ease: "power2.out",
-                scrollTrigger: {
-                    trigger: whyRef.current,
-                    start: "top 80%",
-                    toggleActions: "play none none none"
+        if (tableRef.current) {
+            const rows = tableRef.current?.querySelectorAll('tr')
+            gsap.fromTo(rows, 
+                { opacity: 0, x: -20 },
+                { 
+                    opacity: 1, 
+                    x: 0, 
+                    duration: 0.4,
+                    stagger: 0.08,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: whyRef.current,
+                        start: "top 80%",
+                        toggleActions: "play none none none"
+                    }
                 }
-            }
-        )
+            )
+        }
     }, [])
 
     return(
@@ -479,28 +495,30 @@ const faqs = [
 ]
 
 function Faq(){
-    const [que, setQue] = useState(-1);
+    const [que, setQue] = useState<number>(-1);
     const faqRef = useRef<HTMLDivElement>(null)
     const answersRef = useRef<(HTMLParagraphElement | null)[]>([])
 
     useGSAP(() => {
         // Animate FAQ items
-        const faqItems = faqRef.current?.querySelectorAll('button')
-        gsap.fromTo(faqItems, 
-            { opacity: 0, y: 20 },
-            { 
-                opacity: 1, 
-                y: 0, 
-                duration: 0.5,
-                stagger: 0.1,
-                ease: "power2.out",
-                scrollTrigger: {
-                    trigger: faqRef.current,
-                    start: "top 80%",
-                    toggleActions: "play none none none"
+        if (faqRef.current) {
+            const faqItems = faqRef.current?.querySelectorAll('button')
+            gsap.fromTo(faqItems, 
+                { opacity: 0, y: 20 },
+                { 
+                    opacity: 1, 
+                    y: 0, 
+                    duration: 0.5,
+                    stagger: 0.1,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: faqRef.current,
+                        start: "top 80%",
+                        toggleActions: "play none none none"
+                    }
                 }
-            }
-        )
+            )
+        }
     }, [])
 
     // Animate answer expansion
@@ -551,7 +569,7 @@ function Faq(){
                             </i>
                         </p>
                         <p 
-                            ref={el => answersRef.current[i] = el}
+                            ref={el => { answersRef.current[i] = el; }}
                             className="text-left px-4 pb-4 w-full text-foreground/60 overflow-hidden"
                             style={{ height: 0, opacity: 0 }}
                         >
@@ -570,35 +588,37 @@ function Cta(){
 
     useGSAP(() => {
         // Animate CTA section
-        const tl = gsap.timeline({
-            scrollTrigger: {
-                trigger: ctaRef.current,
-                start: "top 85%",
-                toggleActions: "play none none none"
-            }
-        })
+        if (contentRef.current) {
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: ctaRef.current,
+                    start: "top 85%",
+                    toggleActions: "play none none none"
+                }
+            })
 
-        tl.fromTo(contentRef.current, 
-            { opacity: 0, scale: 0.95, y: 30 },
-            { 
-                opacity: 1, 
-                scale: 1, 
-                y: 0, 
-                duration: 0.8,
-                ease: "power3.out"
-            }
-        )
-        .fromTo(contentRef.current?.querySelectorAll('h1, p, a'), 
-            { opacity: 0, y: 20 },
-            { 
-                opacity: 1, 
-                y: 0, 
-                duration: 0.5,
-                stagger: 0.15,
-                ease: "power2.out"
-            },
-            "-=0.4"
-        )
+            tl.fromTo(contentRef.current, 
+                { opacity: 0, scale: 0.95, y: 30 },
+                { 
+                    opacity: 1, 
+                    scale: 1, 
+                    y: 0, 
+                    duration: 0.8,
+                    ease: "power3.out"
+                }
+            )
+            .fromTo(contentRef.current?.querySelectorAll('h1, p, a'), 
+                { opacity: 0, y: 20 },
+                { 
+                    opacity: 1, 
+                    y: 0, 
+                    duration: 0.5,
+                    stagger: 0.15,
+                    ease: "power2.out"
+                },
+                "-=0.4"
+            )
+        }
     }, [])
 
     return(

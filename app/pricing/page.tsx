@@ -288,8 +288,8 @@ function Card() {
                     <div 
                         key={i} 
                         ref={el => {
-                            cardsRef.current[i] = el
-                            if (t.special) popularRef.current = el
+                            cardsRef.current[i] = el;
+                            if (t.special) popularRef.current = el;
                         }} 
                         className={`flex flex-col p-8 gap-8 rounded-2xl border relative shadow-lg bg-secondary/50
                         ${t.special ? 'glow' : ''}`}
@@ -471,7 +471,7 @@ function Compare(){
                     </thead>
                     <tbody className="rounded-7xl">
                         {table.map((t, i) => (
-                            <tr key={i} ref={el => rowsRef.current[i] = el} className="p-4 w-full border-t">
+                            <tr key={i} ref={el => { rowsRef.current[i] = el; }} className="p-4 w-full border-t">
                                 <td className="w-[40%] border-r p-4 text-foreground/60 text-left">
                                     {t.feature}
                                 </td>
@@ -611,7 +611,7 @@ function Faq(){
                     <button 
                         type="button" 
                         key={i} 
-                        ref={el => faqRef.current[i] = el}
+                        ref={el => { faqRef.current[i] = el; }}
                         onClick={() => i == que ? setQue(-1) : setQue(i)}
                         className="flex flex-col w-full border-b hover:bg-background/50"
                         disabled={isAnimating}
@@ -623,7 +623,7 @@ function Faq(){
                             </i>
                         </p>
                         <p 
-                            ref={el => contentRef.current[i] = el}
+                            ref={el => { contentRef.current[i] = el; }}
                             className={`${i == que ? 'block' : 'hidden'} text-left px-4 pb-4 w-full text-foreground/60`}
                         >
                             {f.a}

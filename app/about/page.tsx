@@ -42,25 +42,31 @@ function Hero() {
         })
 
         // Animate badge
-        tl.from(badgeRef.current, {
-            opacity: 0,
-            y: -30,
-            duration: 0.6
-        })
+        if (badgeRef.current) {
+            tl.from(badgeRef.current, {
+                opacity: 0,
+                y: -30,
+                duration: 0.6
+            })
+        }
         // Animate title with split effect
-        .from(titleRef.current, {
-            opacity: 0,
-            y: 50,
-            duration: 0.8,
-            scale: 0.9,
-            rotationX: 10
-        })
+        if (titleRef.current) {
+            tl.from(titleRef.current, {
+                opacity: 0,
+                y: 50,
+                duration: 0.8,
+                scale: 0.9,
+                rotationX: 10
+            })
+        }
         // Animate description
-        .from(descRef.current, {
-            opacity: 0,
-            y: 30,
-            duration: 0.6
-        })
+        if (descRef.current) {
+            tl.from(descRef.current, {
+                opacity: 0,
+                y: 30,
+                duration: 0.6
+            })
+        }
 
         // Parallax effect on scroll
         if (containerRef.current) {
@@ -300,7 +306,7 @@ function Features(){
                 {features.map((f, i) => (
                     <div 
                         key={i} 
-                        ref={el => featuresRef.current[i] = el} 
+                        ref={el => { featuresRef.current[i] = el; }} 
                         className="flex items-start flex-col p-4 gap-4 bg-secondary border rounded-lg
                             shadow-lg hover:border-primary hover:shadow-primary/10"
                     >
@@ -451,7 +457,7 @@ function RoadMap(){
                 {stages.map((s, i) => (
                     <div 
                         key={i} 
-                        ref={el => stagesRef.current[i] = el} 
+                        ref={el => { stagesRef.current[i] = el; }} 
                         className="flex flex-col gap-2 py-4 pr-4 pl-12 hover:bg-secondary rounded-lg relative"
                     >
                         <span className="text-xs text-primary mono-font uppercase">{s.one}</span>
