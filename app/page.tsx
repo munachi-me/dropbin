@@ -297,7 +297,7 @@ const faqs = [
 
 
 function Faq(){
-    const [que, setQue] = useState(null);
+    const [que, setQue] = useState(-1);
 
     return(
         <div id="faqs" className="w-full flex flex-col items-center justify-center gap-4 text-center py-24 px-4
@@ -315,7 +315,7 @@ function Faq(){
 
             <div className="w-full max-w-4xl my-8">
                 {faqs.map((f, i) => (
-                    <button type="button" key={i} onClick={() => i == que ? setQue(null) : setQue(i)}
+                    <button type="button" key={i} onClick={() => i == que ? setQue(-1) : setQue(i)}
                         className="flex flex-col w-full border-b hover:bg-background/50">
                         <p className="flex items-center w-full text-left justify-between p-4 font-semibold">
                             {f.q}
