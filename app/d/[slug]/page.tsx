@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react"
 import { useParams } from 'next/navigation'
 import {
     BsDot, BsShieldCheck, BsClock, BsCloudDownload,
-    BsLock, BsUnlock, BsDownload
+    BsLock, BsUnlock, BsDownload, BsX,
 } from 'react-icons/bs'
 import FileCard from '@/components/filecard'
 import { useToast } from '@/components/toast'
