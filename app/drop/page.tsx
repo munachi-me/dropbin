@@ -9,7 +9,6 @@ import {
 } from "react-icons/bs"
 import Link from 'next/link'
 import FileCard from '@/components/filecard'
-import { testSupabaseConnection } from '@/lib/supabase'
 import { useToast } from '@/components/toast' // Import the toast hook
 
 // Types
@@ -250,9 +249,15 @@ export default function Drop() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
     }
 
+    const testConnection = async () => {
+        const res = await fetch('/api')
+        if(res.ok){
+            info('Welcome to DropBin! Drop your files to get started.')
+        }
+    }
+
     useEffect(() => {
-        testSupabaseConnection()
-        info('Welcome to DropBin! Drop your files to get started.')
+        testConnection()          
     }, [])
 
     // Success View
