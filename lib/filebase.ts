@@ -89,7 +89,7 @@ export const filebase = {
         }
     },
     
-    async download(filename: string): Promise<string | Error> {
+    async download(filename: string): Promise<string> {
         try {
             const command = new GetObjectCommand({
                 Bucket: env.filebaseBucket,
@@ -103,7 +103,7 @@ export const filebase = {
             return presignedUrl
         } catch (error) {
             console.error('Filebase download error:', error)
-            return error as Error
+            return error as string
         }
     },
     
