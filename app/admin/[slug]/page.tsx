@@ -49,10 +49,10 @@ export default function Page() {
     // Fetch file data
     useEffect(() => {
         async function fetchFile() {
-            if (!slug) return
+            setLoading(true)
+            if (!slug) return           
             
-            try {
-                setLoading(true)
+            try {                
                 const res = await fetch(`/api/admin?id=${slug}`, { method: 'GET' })
                 const data = await res.json()
                 
@@ -60,7 +60,7 @@ export default function Page() {
                     throw new Error(data.error || 'Failed to fetch file')
                 }
                 
-                console.log('File data:', data)
+                setLoading(false)
                 setFile(data)
                 
                 // Set initial values for update modal
@@ -75,8 +75,6 @@ export default function Page() {
                 console.error('Error fetching file:', error)
                 const errorMessage = error instanceof Error ? error.message : 'Failed to load file'
                 toastError(errorMessage)
-            } finally {
-                setLoading(false)
             }
         }
         
@@ -97,8 +95,6 @@ export default function Page() {
             if (!res.ok) {
                 throw new Error(data.error || 'Failed to delete file')
             }
-            
-            console.log('File deleted:', data)
             success('File deleted successfully!')
             
             // Redirect to home or dashboard
@@ -145,8 +141,6 @@ export default function Page() {
             if (!res.ok) {
                 throw new Error(data.error || 'Failed to update file')
             }
-            
-            console.log('File updated:', data)
             success('File updated successfully!')
             
             // Refresh file data
