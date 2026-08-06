@@ -66,7 +66,8 @@ function ToastItem({ toast, onClose }: ToastItemProps) {
     }
 
     return (
-        <div className={`flex items-center gap-3 p-4 rounded-xl border ${styles[toast.type]} shadow-lg animate-in slide-in-from-top-2 duration-300 max-w-md w-full`}>
+        <div className={`flex items-center gap-3 p-4 rounded-xl border ${styles[toast.type]} shadow-lg animate-in slide-in-from-top-2 duration-300 max-w-md w-full
+        z-index-11 bg-secondary`}>
             <span className={`text-xl flex-shrink-0 ${iconColors[toast.type]}`}>
                 {icons[toast.type]}
             </span>
