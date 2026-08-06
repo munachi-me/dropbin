@@ -27,57 +27,40 @@ interface FileData {
     status?: string
 }
 
-interface UpdateData {
-    download_limit?: number
-    expires_at?: string
-}
-
 export default function Page() {
     const { slug } = useParams<{ slug: string }>()
     const router = useRouter()
     const [file, setFile] = useState<FileData>({})
     const [loading, setLoading] = useState<boolean>(true)
     const [deleting, setDeleting] = useState<boolean>(false)
-    const [showUpdateModal, setShowUpdateModal] = useState<boolean>(false)
-    const [downloadLimit, setDownloadLimit] = useState<string>('')
-    const [expiresAt, setExpiresAt] = useState<string>('')
-    const [updating, setUpdating] = useState<boolean>(false)
     
     // Use the toast hook
     const { success, error: toastError, warning, info } = useToast()
 
     // Fetch file data
-    useEffect(() => {
-        async function fetchFile() {
-            setLoading(true)
-            if (!slug) return           
-            
-            try {                
-                const res = await fetch(`/api/admin?id=${slug}`, { method: 'GET' })
-                const data = await res.json()
-                
-                if (!res.ok) {
-                    throw new Error(data.error || 'Failed to fetch file')
-                }
-                
-                setLoading(false)
-                setFile(data)
-                
-                // Set initial values for update modal
-                if (data.download_limit !== null && data.download_limit !== undefined) {
-                    setDownloadLimit(data.download_limit.toString())
-                }
-                if (data.expires_at) {
-                    setExpiresAt(data.expires_at.split('T')[0])
-                }
-                
-            } catch (error) {
-                console.error('Error fetching file:', error)
-                const errorMessage = error instanceof Error ? error.message : 'Failed to load file'
-                toastError(errorMessage)
-            }
-        }
+    async function fetchFile() {
+        setLoading(true)
+        if (!slug) return           
         
+        try {                
+            const res = await fetch(`/api/admin?id=${slug}`, { method: 'GET' })
+            const data = await res.json()
+            
+            if (!res.ok) {
+                throw new Error(data.error || 'Failed to fetch file')
+            }
+            
+            setFile(data)
+            setLoading(false)
+            
+        } catch (error) {
+            console.error('Error fetching file:', error)
+            const errorMessage = error instanceof Error ? error.message : 'Failed to load file'
+            toastError(errorMessage)
+        }
+    }
+
+    useEffect(() => {
         fetchFile()
     }, [])
 
@@ -106,56 +89,6 @@ export default function Page() {
             toastError(errorMessage)
         } finally {
             setDeleting(false)
-        }
-    }
-
-    // Update file
-    async function updateFile(fileId: string) {
-        const updateData: UpdateData = {}
-        
-        if (downloadLimit) {
-            updateData.download_limit = parseInt(downloadLimit, 10)
-        }
-        
-        if (expiresAt) {
-            updateData.expires_at = new Date(expiresAt).toISOString()
-        }
-
-        if (Object.keys(updateData).length === 0) {
-            warning('Please update at least one field')
-            return
-        }
-
-        try {
-            setUpdating(true)
-            const res = await fetch(`/api/update?id=${fileId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(updateData)
-            })
-            
-            const data = await res.json()
-            
-            if (!res.ok) {
-                throw new Error(data.error || 'Failed to update file')
-            }
-            success('File updated successfully!')
-            
-            // Refresh file data
-            const refreshRes = await fetch(`/api/get?id=${fileId}`, { method: 'GET' })
-            const refreshData = await refreshRes.json()
-            setFile(refreshData)
-            
-            setShowUpdateModal(false)
-            
-        } catch (error) {
-            console.error('Error updating file:', error)
-            const errorMessage = error instanceof Error ? error.message : 'Failed to update file'
-            toastError(errorMessage)
-        } finally {
-            setUpdating(false)
         }
     }
 
@@ -242,22 +175,11 @@ export default function Page() {
                     )}
 
                     <div className="w-full flex items-center justify-between gap-4 flex-wrap">
-                        <div className="flex items-center gap-3">
-                            <Link href={`/d/${file.file_id}`}
-                            className="flex items-center justify-center gap-2 rounded-4xl py-3 px-4 border text-sm
-                            hover:bg-accent hover:text-accent-foreground hover:scale-105 transition-all">
-                                <BsBoxArrowUpRight /> View file
-                            </Link>
-
-                            <button 
-                                type="button" 
-                                onClick={() => setShowUpdateModal(true)}
-                                className="flex items-center justify-center gap-2 rounded-4xl py-3 px-4 bg-blue-500 text-sm font-semibold
-                                text-white hover:bg-blue-600 hover:scale-105 transition-all"
-                            >
-                                <BsPencil /> Edit Settings
-                            </button>
-                        </div>
+                        <Link href={`/d/${file.file_id}`}
+                        className="flex items-center justify-center gap-2 rounded-4xl py-3 px-4 border text-sm
+                        hover:bg-accent hover:text-accent-foreground hover:scale-105 transition-all">
+                            <BsBoxArrowUpRight /> View file
+                        </Link>
 
                         <button 
                             type="button" 
@@ -283,86 +205,7 @@ export default function Page() {
                         </button>
                     </div>
                 </div>
-            </div>
-
-            {/* Update Modal */}
-            {showUpdateModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-background rounded-xl border shadow-xl max-w-md w-full p-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-semibold">Edit File Settings</h2>
-                            <button 
-                                onClick={() => setShowUpdateModal(false)}
-                                className="p-1 hover:bg-accent rounded-full transition-colors"
-                            >
-                                <BsX className="text-2xl" />
-                            </button>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">
-                                    Download Limit
-                                </label>
-                                <input
-                                    type="number"
-                                    value={downloadLimit}
-                                    onChange={(e) => setDownloadLimit(e.target.value)}
-                                    placeholder="Enter download limit"
-                                    className="w-full p-2 border rounded-md bg-secondary/50"
-                                    min="0"
-                                />
-                                <p className="text-xs text-foreground/60 mt-1">
-                                    Leave empty for unlimited downloads
-                                </p>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1">
-                                    Expiration Date
-                                </label>
-                                <input
-                                    type="date"
-                                    value={expiresAt}
-                                    onChange={(e) => setExpiresAt(e.target.value)}
-                                    className="w-full p-2 border rounded-md bg-secondary/50"
-                                />
-                                <p className="text-xs text-foreground/60 mt-1">
-                                    Leave empty for no expiration
-                                </p>
-                            </div>
-
-                            <div className="flex gap-3 pt-4">
-                                <button
-                                    onClick={() => file.file_id && updateFile(file.file_id)}
-                                    disabled={updating}
-                                    className="flex-1 bg-primary text-primary-foreground py-2 rounded-md font-semibold
-                                    hover:bg-accent hover:text-accent-foreground transition-colors
-                                    disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {updating ? (
-                                        <>
-                                            <svg className="animate-spin h-4 w-4 inline mr-2" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                            </svg>
-                                            Updating...
-                                        </>
-                                    ) : (
-                                        'Update Settings'
-                                    )}
-                                </button>
-                                <button
-                                    onClick={() => setShowUpdateModal(false)}
-                                    className="flex-1 border rounded-md py-2 hover:bg-accent transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            </div>            
         </div>
     )
 }

@@ -39,35 +39,34 @@ export default function Page() {
     const [lock, setLock] = useState<boolean>(false)
     const [downloading, setDownloading] = useState<boolean>(false)
     const passwordRef = useRef<HTMLInputElement>(null)
-    const [change, setChange] = useState<boolean>(false)
     
     // Use the toast hook
     const { success, error: toastError, warning, info } = useToast()
 
-    useEffect(() => {
-        async function fetchFile() {
-            if (!slug) return
-            
-            try {
-                const res = await fetch(`/api/get?id=${slug}`, { method: 'GET' })
-                const data = await res.json()
-                
-                if (!res.ok) {
-                    throw new Error(data.error || 'Failed to fetch drop')
-                }
-                setFile(data)
-                
-                if (data.password) {
-                    setLock(true)
-                    info('This file is password protected')
-                }
-            } catch (error) {
-                console.error('Error:', error)
-                const errorMessage = error instanceof Error ? error.message : 'Failed to load file'
-                toastError(errorMessage)
-            }
-        }
+    async function fetchFile() {
+        if (!slug) return
         
+        try {
+            const res = await fetch(`/api/get?id=${slug}`, { method: 'GET' })
+            const data = await res.json()
+            
+            if (!res.ok) {
+                throw new Error(data.error || 'Failed to fetch drop')
+            }
+            setFile(data)
+            
+            if (data.password) {
+                setLock(true)
+                info('This file is password protected')
+            }
+        } catch (error) {
+            console.error('Error:', error)
+            const errorMessage = error instanceof Error ? error.message : 'Failed to load file'
+            toastError(errorMessage)
+        }
+    }
+
+    useEffect(() => {
         fetchFile()
     }, [])
 
@@ -95,8 +94,6 @@ export default function Page() {
             if (!res.ok) {
                 throw new Error(data as unknown as string || 'Download Failed')
             }
-            
-            console.log('Download response:', data)
 
             // Check if download limit is reached
             if (data.remaining_downloads !== null && data.remaining_downloads < 0) {
@@ -119,9 +116,8 @@ export default function Page() {
             } else {
                 success('Download started!')
             }
-
-            // Update the file state to reflect download count change
-            setChange(!change)
+            
+            fetchFile()
 
         } catch (error) {
             console.error('Error downloading:', error)
@@ -168,7 +164,7 @@ export default function Page() {
             window.URL.revokeObjectURL(url)
 
             // Update the file state
-            setChange(!change)
+            fetchFile()
             
             success('Download complete!')
 
