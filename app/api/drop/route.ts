@@ -127,7 +127,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             originalName
         )
 
-        if (!uploadResult) {
+        if (!uploadResult.success) {
             return NextResponse.json(
                 { error: 'Failed to upload file to storage' },
                 { status: 500 }

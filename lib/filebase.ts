@@ -1,12 +1,38 @@
-// lib/filebase.js
+// lib/filebase.ts
 import { env } from './env'
 import { 
     S3Client, 
     PutObjectCommand,
-    GetObjectCommand, 
-    DeleteObjectCommand
+    PutObjectCommandOutput,
+    GetObjectCommand,
+    DeleteObjectCommand,
+    DeleteObjectCommandOutput,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+
+// Type definitions
+interface UploadOptions {
+    filetype?: string
+    originalName?: string
+}
+
+interface UploadResult {
+    success: boolean
+    data?: PutObjectCommandOutput
+    error?: Error
+}
+
+interface DownloadResult {
+    success: boolean
+    url?: string
+    error?: Error
+}
+
+interface DeleteResult {
+    success: boolean
+    data?: DeleteObjectCommandOutput
+    error?: Error
+}
 
 // Debug environment variables
 console.log('Filebase Config:', {
@@ -16,6 +42,12 @@ console.log('Filebase Config:', {
     hasSecret: !!env.filebaseSecret,
 })
 
+// Validate required env vars
+if (!env.filebaseBucket || !env.filebaseKey || !env.filebaseSecret) {
+    throw new Error('Missing required Filebase environment variables')
+}
+
+// Initialize S3 client
 const client = new S3Client({
     endpoint: env.filebaseEndpoint,
     region: 'auto',
@@ -27,7 +59,12 @@ const client = new S3Client({
 })
 
 export const filebase = {
-    async upload(filename, buffer, filetype, originalName) {
+    async upload(
+        filename: string, 
+        buffer: Buffer | Uint8Array | Blob | string,
+        filetype?: string, 
+        originalName?: string
+    ): Promise<UploadResult> {
         try {
             console.log(`Uploading to Filebase: ${filename}`)
             
@@ -44,14 +81,21 @@ export const filebase = {
 
             const result = await client.send(uploadCommand)
             console.log('Filebase upload result:', result)
-            return result
+            
+            return {
+                success: true,
+                data: result
+            }
         } catch (error) {
             console.error('Filebase upload error:', error)
-            return null
+            return {
+                success: false,
+                error: error as Error
+            }
         }
     },
     
-    async download(filename) {
+    async download(filename: string): Promise<DownloadResult> {
         try {
             const command = new GetObjectCommand({
                 Bucket: env.filebaseBucket,
@@ -59,17 +103,22 @@ export const filebase = {
             })
 
             const presignedUrl = await getSignedUrl(client, command, {
-                expiresIn: 3600
+                expiresIn: 3600 // 1 hour
             })
 
-            return presignedUrl
+            return {
+                success: true,
+                url: presignedUrl
         } catch (error) {
             console.error('Filebase download error:', error)
-            return null
+            return {
+                success: false,
+                error: error as Error
+            }
         }
     },
     
-    async delete(filename) {
+    async delete(filename: string): Promise<DeleteResult> {
         try {
             const deleteCommand = new DeleteObjectCommand({
                 Bucket: env.filebaseBucket,
@@ -77,10 +126,19 @@ export const filebase = {
             })
 
             const result = await client.send(deleteCommand)
-            return result
+            return {
+                success: true,
+                data: result
+            }
         } catch (error) {
             console.error('Filebase delete error:', error)
-            return null
+            return {
+                success: false,
+                error: error as Error
+            }
         }
     }
 }
+
+// Optional: Export client for direct use if needed
+export { fbclient as s3Client }
