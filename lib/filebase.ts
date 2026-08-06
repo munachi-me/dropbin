@@ -128,6 +128,3 @@ export const filebase = {
         }
     }
 }
-
-// Optional: Export client for direct use if needed
-export { fbclient as s3Client }
