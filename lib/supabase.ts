@@ -19,21 +19,22 @@ if (!env.supabaseServiceKey && !env.supabaseAnonKey) {
 }
 
 // Use service key for server-side, anon key for client-side
-//  const supabaseurl = env.supabaseUrl || 'https://edmcifwyqgjnumzjdcda.supabase.co'
-//  const supabaseKey = env.supabaseServiceKey || env.supabaseAnonKey
 
 // Create typed Supabase client
 const supabaseClient = createClient(env.supabaseUrl, env.supabaseAnonKey)
 
+// Admin client (for server-side only)
+const supabaseAdmin = createClient(env.supabaseUrl, env.supabaseServiceKey)
+
 // Export typed client
 export const supabase = {
-  client: supabaseClient
+  client: supabaseAdmin
 }
 
 // Export a function to test connection
 export async function testSupabaseConnection(): Promise<ConnectionTestResult> {
   try {
-    const { data, error } = await supabaseClient
+    const { data, error } = await supabaseAdmin
       .from('files')
       .select('id', { count: 'exact' })
       .limit(1)
