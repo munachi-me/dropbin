@@ -69,7 +69,7 @@ export default function Page() {
         }
         
         fetchFile()
-    }, [change, slug, toastError])
+    }, [toastError])
 
     function handleUnlock() {
         const enteredPassword = passwordRef.current?.value || ''

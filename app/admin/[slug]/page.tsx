@@ -79,7 +79,7 @@ export default function Page() {
         }
         
         fetchFile()
-    }, [slug, toastError])
+    }, [toastError])
 
     // Delete file
     async function binFile(fileId: string) {
