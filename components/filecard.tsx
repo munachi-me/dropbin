@@ -252,11 +252,15 @@ export default function FileCard({ f, showMetadata = false, onRemove }: FileCard
                     
                     {/* Show additional metadata */}
                     {showMetadata && (
-                        <>
-                            <BsDot className="flex-shrink-0" />
-                            <span className="whitespace-nowrap">
-                                {f.download_count || 0}/{f.download_limit || '∞'} downloads
-                            </span>
+                        <>                           
+                            {f.download_limit && (
+                                <>
+                                    <BsDot className="flex-shrink-0" />
+                                    <span className="whitespace-nowrap">
+                                        {f.download_count}/{f.download_limit} downloads
+                                    </span>
+                                </>
+                            )}
                             {f.created_at && (
                                 <>
                                     <BsDot className="flex-shrink-0" />

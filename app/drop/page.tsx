@@ -282,7 +282,7 @@ export default function Drop() {
                             <div key={i} className="w-full p-4 text-sm flex flex-col items-center gap-3 shadow-lg 
                             rounded-lg bg-secondary border">
                                 <p className="w-full flex items-center gap-3 font-semibold">
-                                    <i className="text-primary text-lg"><BsImage /></i> 
+                                    <i className="text-primary text-lg"><BsFileEarmark /></i> 
                                     <span className="w-full mono-font text-foreground text-sm truncate">
                                         {f.name}
                                     </span>
