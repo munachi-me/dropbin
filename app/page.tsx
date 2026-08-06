@@ -50,57 +50,98 @@ function Hero() {
         // Animate badge with bounce
         if (badgeRef.current) {
             tl.fromTo(badgeRef.current, 
-                { opacity: 0, y: -20, scale: 0.8 },
-                { opacity: 1, y: 0, scale: 1, duration: 0.6 }
+                { opacity: 0, y: -40, scale: 0.8 },
+                { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "back.out(1.7)" }
             )
         }
-        // Animate title with stagger
+        // Animate title with stagger and 3D effect
         if (titleRef.current) {
             tl.fromTo(titleRef.current?.children, 
-                { opacity: 0, y: 30 },
-                { opacity: 1, y: 0, duration: 0.8, stagger: 0.1 }
+                { opacity: 0, y: 50, rotationX: 10 },
+                { opacity: 1, y: 0, rotationX: 0, duration: 1, stagger: 0.12, ease: "power3.out" }
             )
         }
         // Animate description
         if (descRef.current) {
             tl.fromTo(descRef.current, 
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.6 }
+                { opacity: 0, y: 30 },
+                { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }
             )
         }
         // Animate buttons with stagger
         if (buttonsRef.current) {
             tl.fromTo(buttonsRef.current?.children, 
-                { opacity: 0, y: 20, scale: 0.9 },
-                { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.15 }
+                { opacity: 0, y: 30, scale: 0.9 },
+                { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.15, ease: "back.out(1.5)" }
             )
         }
+
+        // Floating particles effect
+        const particles = heroRef.current?.querySelectorAll('.particle')
+        if (particles) {
+            particles.forEach((particle, i) => {
+                gsap.to(particle, {
+                    y: gsap.utils.random(-30, 30),
+                    x: gsap.utils.random(-20, 20),
+                    duration: gsap.utils.random(4, 8),
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "sine.inOut",
+                    delay: i * 0.4
+                })
+            })
+        }
+
+        // Parallax effect on hero
+        if (heroRef.current) {
+            gsap.to(heroRef.current, {
+                y: -20,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: heroRef.current,
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: 1.5
+                }
+            })
+        }
+
     }, [])
 
     return(
-        <div ref={heroRef} className="grid-bg w-full flex flex-col items-center justify-center gap-4 text-center py-24 px-4">
-            <span ref={badgeRef} className="flex items-center gap-2 text-xs text-foreground/60 py-1 px-3 rounded-lg border bg-secondary">
+        <div ref={heroRef} className="grid-bg w-full flex flex-col items-center justify-center gap-4 text-center py-24 px-4 relative overflow-hidden">
+            {/* Decorative particles */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="particle absolute w-2 h-2 bg-primary/10 rounded-full top-[10%] left-[5%]"></div>
+                <div className="particle absolute w-3 h-3 bg-primary/10 rounded-full top-[70%] right-[8%]"></div>
+                <div className="particle absolute w-2 h-2 bg-primary/10 rounded-full bottom-[20%] left-[15%]"></div>
+                <div className="particle absolute w-4 h-4 bg-primary/10 rounded-full top-[40%] right-[12%]"></div>
+                <div className="particle absolute w-2 h-2 bg-primary/10 rounded-full top-[20%] right-[25%]"></div>
+                <div className="particle absolute w-3 h-3 bg-primary/10 rounded-full bottom-[30%] right-[20%]"></div>
+            </div>
+
+            <span ref={badgeRef} className="flex items-center gap-2 text-xs text-foreground/60 py-1 px-3 rounded-lg border bg-secondary relative z-10">
                 <i className="text-primary"><BsStars /></i> 
                 Secure <BsDot /> Temporary <BsDot /> Effortless
             </span>
-            <h1 ref={titleRef} className="text-3xl md:text-5xl font-bold">
+            <h1 ref={titleRef} className="text-3xl md:text-5xl font-bold relative z-10">
                 Temporary file sharing, <span className="gradient-text">made effortless.</span>
             </h1>
-            <p ref={descRef} className="text-foreground/60 text-center w-full max-w-xl text-sm md:text-base">
+            <p ref={descRef} className="text-foreground/60 text-center w-full max-w-xl text-sm md:text-base relative z-10">
                 Upload any file, share a secure link, and let DropBin automatically remove it when it's no longer needed. 
                 No accounts. No clutter. No permanence.
             </p>
 
-            <div ref={buttonsRef} className="flex flex-wrap justify-center items-center gap-2 w-full max-w-content text-sm">
+            <div ref={buttonsRef} className="flex flex-wrap justify-center items-center gap-2 w-full max-w-content text-sm relative z-10">
                 <Link href="/drop"
                 className="px-4 py-3 rounded-2xl bg-primary text-primary-foreground font-semibold
-                flex items-center gap-2
+                flex items-center gap-2 transition-all hover:scale-105 hover:shadow-lg
                 hover:bg-accent hover:text-accent-foreground">
-                    <BsCloudUpload /> Drop a file 
+                    <BsCloudUpload className="transition-transform group-hover:rotate-12" /> Drop a file 
                 </Link>
                 <Link href="/pricing"
                 className="px-4 py-3 rounded-2xl border font-semibold
-                flex items-center gap-2
+                flex items-center gap-2 transition-all hover:scale-105 hover:shadow-lg
                 hover:bg-accent hover:text-accent-foreground">
                     <BsTags /> See pricing 
                 </Link>
@@ -118,18 +159,20 @@ const file = {
 function Card() {
     const cardRef = useRef<HTMLDivElement>(null)
     const progressRef = useRef<HTMLDivElement>(null)
+    const detailsRef = useRef<HTMLDivElement>(null)
 
     useGSAP(() => {
-        // Animate card entrance
+        // Animate card entrance with 3D effect
         if (cardRef.current) {
             gsap.fromTo(cardRef.current, 
-                { opacity: 0, y: 50, scale: 0.95 },
+                { opacity: 0, y: 60, scale: 0.9, rotationX: 5 },
                 { 
                     opacity: 1, 
                     y: 0, 
                     scale: 1, 
-                    duration: 1,
-                    ease: "power3.out",
+                    rotationX: 0,
+                    duration: 1.2,
+                    ease: "back.out(1.8)",
                     scrollTrigger: {
                         trigger: cardRef.current,
                         start: "top 85%",
@@ -139,13 +182,13 @@ function Card() {
             )
         }
 
-        // Animate progress bar
+        // Animate progress bar with pulse
         if (progressRef.current) {
             gsap.fromTo(progressRef.current,
                 { width: "0%" },
                 { 
                     width: "100%", 
-                    duration: 2, 
+                    duration: 2.5, 
                     delay: 1,
                     ease: "power2.inOut",
                     scrollTrigger: {
@@ -156,12 +199,33 @@ function Card() {
                 }
             )
         }
+
+        // Animate details section with stagger
+        if (detailsRef.current) {
+            const items = detailsRef.current.children
+            gsap.fromTo(items,
+                { opacity: 0, x: -20 },
+                {
+                    opacity: 1,
+                    x: 0,
+                    duration: 0.5,
+                    stagger: 0.1,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: detailsRef.current,
+                        start: "top 85%",
+                        toggleActions: "play none none none"
+                    }
+                }
+            )
+        }
+
     }, [])
 
     return(
         <div ref={cardRef} className="max-w-xl mx-auto mb-12 w-[90%] flex flex-col rounded-lg border bg-secondary text-xs shadow-lg shadow-shadow">
             <div className="flex border-b p-4 gap-4 justify-between items-center w-full text-primary">
-                <BsCircleFill />
+                <BsCircleFill className="animate-pulse" />
                 <span className="text-foreground/60 mono-font">dropbin/d/k7s2...</span>
             </div>
             <div className="flex flex-col gap-3 p-4 w-full">
@@ -172,12 +236,14 @@ function Card() {
                         <span>Encrypting & uploading</span>
                         <span className="mono-font text-primary">100%</span>
                     </div>
-                    <div className="w-full rounded-xl gradient-bg p-1">
-                        <div ref={progressRef} className="h-full w-0"></div>
+                    <div className="w-full rounded-xl gradient-bg p-1 relative overflow-hidden">
+                        <div ref={progressRef} className="h-full w-0 relative">
+                            <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                        </div>
                     </div>
                 </div>
 
-                <div className="p-3 rounded-lg border flex flex-col gap-2 w-full bg-secondary shadow-lg">
+                <div ref={detailsRef} className="p-3 rounded-lg border flex flex-col gap-2 w-full bg-secondary shadow-lg">
                     <div className="flex items-center gap-4 w-full">
                         <span className="text-primary"><BsShare/></span>
                         <span style={{whiteSpace: 'nowrap'}}>Drop link</span>
@@ -210,17 +276,18 @@ function Step(){
     const stepCardsRef = useRef<(HTMLDivElement | null)[]>([])
 
     useGSAP(() => {
-        // Animate step cards with stagger
+        // Animate step cards with stagger and 3D
         if (stepCardsRef.current) {
             gsap.fromTo(stepCardsRef.current, 
-                { opacity: 0, y: 40, scale: 0.9 },
+                { opacity: 0, y: 50, scale: 0.85, rotationY: 10 },
                 { 
                     opacity: 1, 
                     y: 0, 
                     scale: 1, 
-                    duration: 0.8,
+                    rotationY: 0,
+                    duration: 0.9,
                     stagger: 0.2,
-                    ease: "back.out(1.7)",
+                    ease: "back.out(1.8)",
                     scrollTrigger: {
                         trigger: stepRef.current,
                         start: "top 80%",
@@ -230,24 +297,66 @@ function Step(){
             )
         }
 
-        // Hover animation for each card
+        // Enhanced hover animation for each card
         stepCardsRef.current.forEach((card) => {
             if (card) {
                 card.addEventListener('mouseenter', () => {
                     gsap.to(card, { 
-                        y: -5, 
-                        boxShadow: "0 10px 30px rgba(var(--primary), 0.15)",
-                        duration: 0.3,
-                        ease: "power2.out"
+                        y: -8, 
+                        scale: 1.02,
+                        boxShadow: "0 20px 40px rgba(99, 102, 241, 0.15)",
+                        borderColor: "rgba(99, 102, 241, 0.3)",
+                        duration: 0.4,
+                        ease: "power3.out"
                     })
+                    // Animate icon
+                    const icon = card.querySelector('i')
+                    if (icon) {
+                        gsap.to(icon, {
+                            scale: 1.2,
+                            rotation: 10,
+                            duration: 0.4,
+                            ease: "back.out(1.7)"
+                        })
+                    }
+                    // Animate number
+                    const number = card.querySelector('.mono-font')
+                    if (number) {
+                        gsap.to(number, {
+                            scale: 1.1,
+                            color: "rgba(99, 102, 241, 0.8)",
+                            duration: 0.3,
+                            ease: "power2.out"
+                        })
+                    }
                 })
                 card.addEventListener('mouseleave', () => {
                     gsap.to(card, { 
                         y: 0, 
+                        scale: 1,
                         boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                        duration: 0.3,
-                        ease: "power2.in"
+                        borderColor: "transparent",
+                        duration: 0.4,
+                        ease: "power3.out"
                     })
+                    const icon = card.querySelector('i')
+                    if (icon) {
+                        gsap.to(icon, {
+                            scale: 1,
+                            rotation: 0,
+                            duration: 0.4,
+                            ease: "power3.out"
+                        })
+                    }
+                    const number = card.querySelector('.mono-font')
+                    if (number) {
+                        gsap.to(number, {
+                            scale: 1,
+                            color: "",
+                            duration: 0.3,
+                            ease: "power2.out"
+                        })
+                    }
                 })
             }
         })
@@ -272,11 +381,11 @@ function Step(){
                         key={i} 
                         ref={el => { stepCardsRef.current[i] = el; }}
                         className="flex items-start flex-col p-4 gap-4 bg-secondary border rounded-lg
-                        shadow-lg hover:border-primary hover:shadow-primary/10 hover:translate-y-[-3px]"
+                        shadow-lg hover:border-primary hover:shadow-primary/10 transition-all"
                     >
                         <div className="flex w-full justify-between items-center text-xl">
-                            <i className="p-4 rounded-sm text-primary bg-primary/10">{s.icon}</i>
-                            <span className="text-foreground/25 mono-font text-4xl">{s.num}</span>
+                            <i className="p-4 rounded-sm text-primary bg-primary/10 transition-all">{s.icon}</i>
+                            <span className="text-foreground/25 mono-font text-4xl transition-all">{s.num}</span>
                         </div>
                         <h2 className="text-base text-left font-semibold">{s.name}</h2>
                         <p className="text-foreground/60 text-left text-sm">{s.desc}</p>
@@ -306,17 +415,18 @@ function Features(){
         // Animate feature cards with alternating stagger
         if (featureCardsRef.current) {
             gsap.fromTo(featureCardsRef.current, 
-                { opacity: 0, scale: 0.8, rotation: 2 },
+                { opacity: 0, scale: 0.7, rotation: 5, y: 40 },
                 { 
                     opacity: 1, 
                     scale: 1, 
                     rotation: 0,
-                    duration: 0.7,
+                    y: 0,
+                    duration: 0.8,
                     stagger: {
-                        amount: 0.5,
+                        amount: 0.6,
                         from: "center"
                     },
-                    ease: "back.out(1.5)",
+                    ease: "back.out(1.7)",
                     scrollTrigger: {
                         trigger: featuresRef.current,
                         start: "top 80%",
@@ -326,24 +436,46 @@ function Features(){
             )
         }
 
-        // Add hover animations
+        // Enhanced hover animations
         featureCardsRef.current.forEach((card) => {
             if (card) {
                 card.addEventListener('mouseenter', () => {
                     gsap.to(card, { 
-                        y: -8, 
-                        boxShadow: "0 15px 35px rgba(var(--primary), 0.1)",
-                        duration: 0.3,
-                        ease: "power2.out"
+                        y: -12, 
+                        scale: 1.04,
+                        boxShadow: "0 25px 50px rgba(99, 102, 241, 0.15)",
+                        borderColor: "rgba(99, 102, 241, 0.3)",
+                        duration: 0.4,
+                        ease: "power3.out"
                     })
+                    const icon = card.querySelector('i')
+                    if (icon) {
+                        gsap.to(icon, {
+                            scale: 1.3,
+                            rotation: 15,
+                            duration: 0.4,
+                            ease: "back.out(1.8)"
+                        })
+                    }
                 })
                 card.addEventListener('mouseleave', () => {
                     gsap.to(card, { 
                         y: 0, 
+                        scale: 1,
                         boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                        duration: 0.3,
-                        ease: "power2.in"
+                        borderColor: "transparent",
+                        duration: 0.4,
+                        ease: "power3.out"
                     })
+                    const icon = card.querySelector('i')
+                    if (icon) {
+                        gsap.to(icon, {
+                            scale: 1,
+                            rotation: 0,
+                            duration: 0.4,
+                            ease: "power3.out"
+                        })
+                    }
                 })
             }
         })
@@ -369,10 +501,10 @@ function Features(){
                         key={i} 
                         ref={el => { featureCardsRef.current[i] = el; }}
                         className="flex items-start flex-col p-4 gap-4 bg-secondary border rounded-lg
-                        shadow-lg hover:border-primary hover:shadow-primary/10 hover:translate-y-[-3px]"
+                        shadow-lg hover:border-primary hover:shadow-primary/10 transition-all"
                     >
                         <div className="flex w-full justify-between items-center text-xl">
-                            <i className="p-4 rounded-sm text-primary bg-primary/10">{f.icon}</i>
+                            <i className="p-4 rounded-sm text-primary bg-primary/10 transition-all">{f.icon}</i>
                         </div>
                         <h2 className="text-base text-left font-semibold">{f.name}</h2>
                         <p className="text-foreground/60 text-left text-sm">{f.desc}</p>
@@ -399,16 +531,32 @@ function Why(){
     const tableRef = useRef<HTMLTableElement>(null)
 
     useGSAP(() => {
-        // Animate table rows
+        // Animate table with 3D perspective
         if (tableRef.current) {
+            gsap.fromTo(tableRef.current,
+                { opacity: 0, scale: 0.95, rotationX: 3 },
+                {
+                    opacity: 1,
+                    scale: 1,
+                    rotationX: 0,
+                    duration: 1,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: whyRef.current,
+                        start: "top 80%",
+                        toggleActions: "play none none none"
+                    }
+                }
+            )
+
             const rows = tableRef.current?.querySelectorAll('tr')
             gsap.fromTo(rows, 
-                { opacity: 0, x: -20 },
+                { opacity: 0, x: -30 },
                 { 
                     opacity: 1, 
                     x: 0, 
-                    duration: 0.4,
-                    stagger: 0.08,
+                    duration: 0.5,
+                    stagger: 0.06,
                     ease: "power2.out",
                     scrollTrigger: {
                         trigger: whyRef.current,
@@ -450,7 +598,7 @@ function Why(){
                     </thead>
                     <tbody className="rounded-7xl">
                         {table.map((t, i) => (
-                            <tr key={i} className="p-4 w-full border-t">
+                            <tr key={i} className="p-4 w-full border-t transition-all hover:bg-primary/5">
                                 <td className="w-[40%] border-r p-4 text-foreground/60 text-left">
                                     {t.cap}
                                 </td>
@@ -498,18 +646,19 @@ function Faq(){
     const [que, setQue] = useState<number>(-1);
     const faqRef = useRef<HTMLDivElement>(null)
     const answersRef = useRef<(HTMLParagraphElement | null)[]>([])
+    const [isAnimating, setIsAnimating] = useState<boolean>(false)
 
     useGSAP(() => {
-        // Animate FAQ items
+        // Animate FAQ items with stagger
         if (faqRef.current) {
             const faqItems = faqRef.current?.querySelectorAll('button')
             gsap.fromTo(faqItems, 
-                { opacity: 0, y: 20 },
+                { opacity: 0, y: 30 },
                 { 
                     opacity: 1, 
                     y: 0, 
-                    duration: 0.5,
-                    stagger: 0.1,
+                    duration: 0.6,
+                    stagger: 0.08,
                     ease: "power2.out",
                     scrollTrigger: {
                         trigger: faqRef.current,
@@ -521,22 +670,26 @@ function Faq(){
         }
     }, [])
 
-    // Animate answer expansion
+    // Enhanced answer expansion animation
     useEffect(() => {
         answersRef.current.forEach((answer, index) => {
             if (answer) {
                 if (index === que) {
+                    setIsAnimating(true)
                     gsap.to(answer, {
                         height: "auto",
                         opacity: 1,
-                        duration: 0.4,
-                        ease: "power2.out"
+                        y: 0,
+                        duration: 0.5,
+                        ease: "power3.out",
+                        onComplete: () => setIsAnimating(false)
                     })
                 } else {
                     gsap.to(answer, {
                         height: 0,
                         opacity: 0,
-                        duration: 0.3,
+                        y: -10,
+                        duration: 0.4,
                         ease: "power2.in"
                     })
                 }
@@ -560,11 +713,16 @@ function Faq(){
 
             <div className="w-full max-w-4xl my-8">
                 {faqs.map((f, i) => (
-                    <button type="button" key={i} onClick={() => i == que ? setQue(-1) : setQue(i)}
-                        className="flex flex-col w-full border-b hover:bg-background/50 transition-colors">
+                    <button 
+                        type="button" 
+                        key={i} 
+                        onClick={() => i == que ? setQue(-1) : setQue(i)}
+                        className="flex flex-col w-full border-b hover:bg-background/50 transition-colors"
+                        disabled={isAnimating}
+                    >
                         <p className="flex items-center w-full text-left justify-between p-4 font-semibold">
                             {f.q}
-                            <i className="transition-transform duration-300" style={{ transform: i === que ? 'rotate(180deg)' : 'rotate(0)' }}>
+                            <i className="transition-all duration-300" style={{ transform: i === que ? 'rotate(180deg)' : 'rotate(0)' }}>
                                 {i == que ? <BsChevronUp /> : <BsChevronDown />}
                             </i>
                         </p>
@@ -587,7 +745,7 @@ function Cta(){
     const contentRef = useRef<HTMLDivElement>(null)
 
     useGSAP(() => {
-        // Animate CTA section
+        // Enhanced CTA animation with 3D perspective
         if (contentRef.current) {
             const tl = gsap.timeline({
                 scrollTrigger: {
@@ -598,27 +756,53 @@ function Cta(){
             })
 
             tl.fromTo(contentRef.current, 
-                { opacity: 0, scale: 0.95, y: 30 },
+                { opacity: 0, scale: 0.85, y: 50, rotationX: 5 },
                 { 
                     opacity: 1, 
                     scale: 1, 
                     y: 0, 
-                    duration: 0.8,
-                    ease: "power3.out"
+                    rotationX: 0,
+                    duration: 1,
+                    ease: "back.out(1.8)"
                 }
             )
             .fromTo(contentRef.current?.querySelectorAll('h1, p, a'), 
-                { opacity: 0, y: 20 },
+                { opacity: 0, y: 30 },
                 { 
                     opacity: 1, 
                     y: 0, 
-                    duration: 0.5,
-                    stagger: 0.15,
+                    duration: 0.6,
+                    stagger: 0.12,
                     ease: "power2.out"
                 },
-                "-=0.4"
+                "-=0.5"
             )
+
+            // Floating animation for CTA
+            gsap.to(contentRef.current, {
+                y: -8,
+                duration: 3,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            })
         }
+
+        // Enhanced button pulse
+        if (ctaRef.current) {
+            const button = ctaRef.current.querySelector('a')
+            if (button) {
+                gsap.to(button, {
+                    scale: 1.05,
+                    boxShadow: "0 15px 40px rgba(99, 102, 241, 0.4)",
+                    duration: 1.8,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "sine.inOut"
+                })
+            }
+        }
+
     }, [])
 
     return(
@@ -634,9 +818,9 @@ function Cta(){
 
                 <Link href="/drop"
                 className="px-8 py-4 rounded-4xl bg-background text-foreground font-semibold
-                flex items-center gap-2
+                flex items-center gap-2 transition-all hover:scale-105 hover:shadow-lg
                 hover:bg-accent hover:text-accent-foreground">
-                    <BsCloudUpload /> Drop files 
+                    <BsCloudUpload className="transition-transform group-hover:rotate-12" /> Drop files 
                 </Link>
             </div>  
         </div>
