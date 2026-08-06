@@ -1,6 +1,7 @@
 "use client"
 import { useState, useRef, useEffect } from "react"
 import { useParams } from 'next/navigation'
+import Link from 'next/link'
 import {
     BsDot, BsShieldCheck, BsClock, BsCloudDownload,
     BsLock, BsUnlock, BsDownload, BsX,
