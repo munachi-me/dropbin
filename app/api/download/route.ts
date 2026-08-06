@@ -28,7 +28,7 @@ interface DownloadResponse {
 }
 interface DownloadResult {
     success: boolean
-    url?: string
+    url: string
     error?: Error
 }
 
