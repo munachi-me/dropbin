@@ -55,8 +55,6 @@ export default function Page() {
                 if (!res.ok) {
                     throw new Error(data.error || 'Failed to fetch drop')
                 }
-                
-                console.log('Success:', data)
                 setFile(data)
                 
                 if (data.password) {
@@ -78,7 +76,6 @@ export default function Page() {
         
         if (enteredPassword === file.password) {
             setLock(false)
-            setChange(!change)
             success('Access granted!')
         } else {
             toastError('Access denied! Incorrect password.')
