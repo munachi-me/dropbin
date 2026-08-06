@@ -24,8 +24,8 @@ import {
     BsFileEarmarkLockFill,
     BsCloudCheck,
     BsCloudSlash,
-    IconType,
 } from "react-icons/bs"
+import { IconType } from 'react-icons'
 
 // Types
 export interface FileCardProps {
