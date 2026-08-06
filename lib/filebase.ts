@@ -22,12 +22,6 @@ interface UploadResult {
     error?: Error
 }
 
-interface DownloadResult {
-    success: boolean
-    url: string
-    error?: Error
-}
-
 interface DeleteResult {
     success: boolean
     data?: DeleteObjectCommandOutput
@@ -95,7 +89,7 @@ export const filebase = {
         }
     },
     
-    async download(filename: string): Promise<DownloadResult> {
+    async download(filename: string): Promise<string | Error> {
         try {
             const command = new GetObjectCommand({
                 Bucket: env.filebaseBucket,
@@ -106,17 +100,10 @@ export const filebase = {
                 expiresIn: 3600 // 1 hour
             })
 
-            return {
-                success: true,
-                url: presignedUrl,
-            }
+            return presignedUrl
         } catch (error) {
             console.error('Filebase download error:', error)
-            return {
-                success: false,
-                url: '',
-                error: error as Error
-            }
+            return error as Error
         }
     },
     
