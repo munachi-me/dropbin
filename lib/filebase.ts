@@ -108,7 +108,8 @@ export const filebase = {
 
             return {
                 success: true,
-                url: presignedUrl
+                url: presignedUrl,
+            }
         } catch (error) {
             console.error('Filebase download error:', error)
             return {
