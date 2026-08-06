@@ -22,7 +22,7 @@ if (!env.supabaseServiceKey && !env.supabaseAnonKey) {
 const supabaseKey = env.supabaseServiceKey || env.supabaseAnonKey
 
 // Create typed Supabase client
-const supabaseClient = createClient<Database>(
+const supabaseClient = createClient(
   env.supabaseUrl,
   supabaseKey,
   {
@@ -71,6 +71,3 @@ export async function testSupabaseConnection(): Promise<ConnectionTestResult> {
     }
   }
 }
-
-// Export client directly for flexibility
-export { supabaseClient }
