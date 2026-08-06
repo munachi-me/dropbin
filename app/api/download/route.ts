@@ -143,10 +143,10 @@ export async function GET(request: Request): Promise<NextResponse> {
         }
 
         // Generate presigned URL from Filebase
-        let presignedUrl;
+        let presignedUrl: {success: boolean, url: string}
         try {
             presignedUrl = await filebase.download(file.filename)
-            if (!presignedUrl) {
+            if (!presignedUrl.success) {
                 throw new Error('Failed to generate presigned URL')
             }
         } catch (urlError) {
@@ -181,7 +181,7 @@ export async function GET(request: Request): Promise<NextResponse> {
 
         // Prepare response
         const responseData: DownloadResponse = {
-            download_url: presignedUrl,
+            download_url: presignedUrl.url,
             filename: file.name,
             file_size: file.size,
             file_type: file.type,
