@@ -1,7 +1,6 @@
 // "use client"
 import Link from 'next/link'
 import {
-    BsCircleFill,
     BsTwitterX, 
     BsGithub, 
     BsInstagram,
@@ -45,7 +44,7 @@ export default function Footer(){
             <div className="w-full max-w-6xl mx-auto grid grid-cols-3 lg:grid-cols-6 gap-8">
                 <div className="flex flex-col gap-4 font-md col-span-3">
                     <Link href="/" className="flex items-center gap-2 text-primary">
-                        <BsCircleFill />
+                        <img src='/dropbin_icon.png' alt="DropBin Logo" className="w-auto h-xs" />
                         <span className="text-foreground font-bold">DropBin</span>
                     </Link>
                     <p className="text-foreground/60 max-w-lg">

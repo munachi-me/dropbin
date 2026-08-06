@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react"
 import { useParams } from 'next/navigation'
 import {
-    BsDot, BsShieldCheck, BsClock, BsCloudDownload, BsCircleFill,
+    BsDot, BsShieldCheck, BsClock, BsCloudDownload,
     BsLock, BsUnlock, BsDownload
 } from 'react-icons/bs'
 import FileCard from '@/components/filecard'
@@ -230,7 +230,7 @@ export default function Page() {
             <div className="w-full max-w-3xl rounded-xl border flex flex-col items-center justify-center bg-secondary/50 shadow-lg">
                 <div className="flex gap-4 items-center w-full justify-between border-b p-6">
                     <div className="flex items-center gap-2 text-primary text-sm">
-                        <BsCircleFill />
+                        <img src='/dropbin_icon.png' alt="DropBin Logo" className="w-auto h-xs" />
                         <h3 className="text-foreground font-bold">DropBin</h3>
                     </div>
                     <span className="text-xs mono-font">
