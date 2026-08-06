@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: { default: 'DropBin — Drop. Share. Done.', template: '%s | DropBin' },
   description: "Share files in seconds. Fast, temporary file sharing, made effortless. Upload any file via drag or drop, and get a shareable secure link instantly. Files auto-delete so you never have to clean up.",
   authors: [{ name: "DropBin by Munachi", url: "https://github.com/munachi-prime/dropbin.git" }],
-  // icons: "/dropbin-icon.png",
+  icons: "/dropbin_icon.png",
   
   openGraph: {
     type: "website",

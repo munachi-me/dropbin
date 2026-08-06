@@ -31,7 +31,7 @@ export default function Nav(){
         <nav className={`flex w-full fixed z-5 top-0 left-0 p-4 ${scroll ? 'border-b backdrop-blur-lg bg-background/60' : ''}`}>
             <div className="flex w-full max-w-6xl items-center justify-between mx-auto my-0">
                 <Link href="/" className="flex items-center gap-2 text-primary">
-                    <img src='/dropbin_icon.png' alt="DropBin Logo" className="w-auto h-xs" />
+                    <img src='/dropbin_icon.png' alt="DropBin Logo" className="w-auto h-[1.5em]" />
                     <h3 className="text-foreground font-bold">DropBin</h3>
                 </Link>
 
