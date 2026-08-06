@@ -37,6 +37,8 @@ export default function Page() {
     const { slug } = useParams<{ slug: string }>()
     const [file, setFile] = useState<FileData>({})
     const [lock, setLock] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(true)
+    const [notFound, setNotFound] = useState<boolean>(false)
     const [downloading, setDownloading] = useState<boolean>(false)
     const passwordRef = useRef<HTMLInputElement>(null)
     
@@ -44,6 +46,7 @@ export default function Page() {
     const { success, error: toastError, warning, info } = useToast()
 
     async function fetchFile() {
+        setLoading(true)
         if (!slug) return
         
         try {
@@ -54,6 +57,7 @@ export default function Page() {
                 throw new Error(data.error || 'Failed to fetch drop')
             }
             setFile(data)
+            setLoading(false)
             
             if (data.password) {
                 setLock(true)
@@ -63,6 +67,8 @@ export default function Page() {
             console.error('Error:', error)
             const errorMessage = error instanceof Error ? error.message : 'Failed to load file'
             toastError(errorMessage)
+            setLoading(false)
+            setNotFound(true)
         }
     }
 
@@ -178,7 +184,7 @@ export default function Page() {
     }
 
     // Loading state
-    if (!file || Object.keys(file).length === 0) {
+    if (loading) {
         return (
             <div className="w-full flex min-h-[100dvh] items-center justify-center px-4 py-24">
                 <div className="flex flex-col items-center gap-4">
@@ -187,6 +193,24 @@ export default function Page() {
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
                     <p className="text-sm text-foreground/60">Loading file...</p>
+                </div>
+            </div>
+        )
+    }
+
+    // If file not found
+    if (!file || Object.keys(file).length === 0 || notFound) {
+        return (
+            <div className="w-full flex min-h-[100dvh] items-center justify-center px-4 py-24">
+                <div className="w-full max-w-md rounded-xl border flex flex-col items-center gap-4 p-8 bg-secondary/50 shadow-lg">
+                    <BsX className="text-4xl text-destructive" />
+                    <h2 className="text-xl font-semibold">File Not Found</h2>
+                    <p className="text-sm text-foreground/60 text-center">
+                        The file you're looking for doesn't exist or has been deleted.
+                    </p>
+                    <Link href="/" className="text-primary hover:underline text-sm">
+                        Return to home
+                    </Link>
                 </div>
             </div>
         )

@@ -32,6 +32,7 @@ export default function Page() {
     const router = useRouter()
     const [file, setFile] = useState<FileData>({})
     const [loading, setLoading] = useState<boolean>(true)
+    const [notFound, setNotFound] = useState<boolean>(false)
     const [deleting, setDeleting] = useState<boolean>(false)
     
     // Use the toast hook
@@ -57,6 +58,8 @@ export default function Page() {
             console.error('Error fetching file:', error)
             const errorMessage = error instanceof Error ? error.message : 'Failed to load file'
             toastError(errorMessage)
+            setLoading(false)
+            setNotFound(true)
         }
     }
 
@@ -108,7 +111,7 @@ export default function Page() {
     }
 
     // If file not found
-    if (!file || Object.keys(file).length === 0) {
+    if (!file || Object.keys(file).length === 0 || notFound) {
         return (
             <div className="w-full flex min-h-[100dvh] items-center justify-center px-4 py-24">
                 <div className="w-full max-w-md rounded-xl border flex flex-col items-center gap-4 p-8 bg-secondary/50 shadow-lg">
@@ -130,7 +133,7 @@ export default function Page() {
             <div className="w-full max-w-3xl rounded-xl border flex flex-col items-center justify-center bg-secondary/50 shadow-lg">
                 <div className="flex gap-4 items-center w-full justify-between border-b p-6">
                     <div className="flex items-center gap-2 text-primary text-sm">
-                        <img src='/dropbin_icon.png' alt="DropBin Logo" className="w-auto h-[1em]" />
+                        <img src='/dropbin_icon.png' alt="DropBin Logo" className="w-auto h-[1.5em]" />
                         <h3 className="text-foreground font-bold">DropBin</h3>
                     </div>
                     <span className="text-xs mono-font bg-primary/10 text-primary px-3 py-1 rounded-full">
