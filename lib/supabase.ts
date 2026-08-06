@@ -19,23 +19,11 @@ if (!env.supabaseServiceKey && !env.supabaseAnonKey) {
 }
 
 // Use service key for server-side, anon key for client-side
-const supabaseurl = env.supabaseUrl || 'https://edmcifwyqgjnumzjdcda.supabase.co'
-const supabaseKey = env.supabaseServiceKey || env.supabaseAnonKey
+//  const supabaseurl = env.supabaseUrl || 'https://edmcifwyqgjnumzjdcda.supabase.co'
+//  const supabaseKey = env.supabaseServiceKey || env.supabaseAnonKey
 
 // Create typed Supabase client
-const supabaseClient = createClient(
-  supabaseurl,
-  supabaseKey,
-  {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-    db: {
-      schema: 'public',
-    },
-  }
-)
+const supabaseClient = createClient(env.supabaseUrl, env.supabaseAnonKey)
 
 // Export typed client
 export const supabase = {
