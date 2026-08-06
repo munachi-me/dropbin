@@ -19,11 +19,12 @@ if (!env.supabaseServiceKey && !env.supabaseAnonKey) {
 }
 
 // Use service key for server-side, anon key for client-side
+const supabaseurl = env.supabaseUrl || 'https://edmcifwyqgjnumzjdcda.supabase.co'
 const supabaseKey = env.supabaseServiceKey || env.supabaseAnonKey
 
 // Create typed Supabase client
 const supabaseClient = createClient(
-  env.supabaseUrl,
+  supabaseurl,
   supabaseKey,
   {
     auth: {

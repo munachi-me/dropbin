@@ -1,10 +1,10 @@
 "use client"
 import { useState, useRef, useEffect } from "react"
 import { 
-    BsInfinity, BsClock, BsCloudDownload, BsLock,
+    BsClock, BsCloudDownload, BsLock,
     BsCloudUpload, BsStars, BsDot,
     BsGear, BsX,
-    BsLink45Deg, BsQrCode, BsCopy, BsBoxArrowUpRight,
+    BsCopy, BsBoxArrowUpRight,
     BsImage, BsCheckCircle, BsExclamationTriangle,
 } from "react-icons/bs"
 import Link from 'next/link'
