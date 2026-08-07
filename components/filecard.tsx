@@ -1,5 +1,6 @@
 import React from 'react'
 import { 
+    BsX,
     BsFileEarmarkZip,
     BsFileEarmarkText,
     BsPlay,
@@ -55,14 +56,6 @@ export interface FileData {
     status?: string
     drop_url?: string
     admin_url?: string
-}
-
-// Status icon props
-interface StatusIconProps {
-    expires_at?: string | null
-    download_limit?: number | null
-    download_count?: number
-    password?: string | null
 }
 
 const divisor = 1024 // Use 1024 for proper file size calculation
@@ -204,20 +197,6 @@ export default function FileCard({ f, showMetadata = false, onRemove }: FileCard
         return BsFileEarmark
     }
 
-    // Get status icon (for metadata view)
-    const getStatusIcon = (data: StatusIconProps) => {
-        if (data.expires_at && new Date(data.expires_at) < new Date()) {
-            return <BsFileEarmarkX className="text-destructive" title="Expired" />
-        }
-        if (data.download_limit && data.download_count && data.download_count >= data.download_limit) {
-            return <BsCloudSlash className="text-destructive" title="Download limit reached" />
-        }
-        if (data.password) {
-            return <BsFileEarmarkLock className="text-warning" title="Password protected" />
-        }
-        return <BsCloudCheck className="text-green-500" title="Active" />
-    }
-
     const fileName = f.name || f.original_name || ''
     const fileSize = f.size || f.file_size || 0
     const fileType = f.type || f.mime_type || ''
@@ -272,23 +251,6 @@ export default function FileCard({ f, showMetadata = false, onRemove }: FileCard
                         </>
                     )}
                 </div>
-
-                {/* Status badge for metadata view */}
-                {showMetadata && (
-                    <div className="flex items-center gap-2 mt-1">
-                        {getStatusIcon({
-                            expires_at: f.expires_at,
-                            download_limit: f.download_limit,
-                            download_count: f.download_count,
-                            password: f.password,
-                        })}
-                        {f.expires_at && (
-                            <span className="text-[10px] text-foreground/40">
-                                Expires: {new Date(f.expires_at).toLocaleDateString()}
-                            </span>
-                        )}
-                    </div>
-                )}
             </span>
 
             {/* Action buttons */}
@@ -299,7 +261,7 @@ export default function FileCard({ f, showMetadata = false, onRemove }: FileCard
                         className="opacity-0 group-hover:opacity-100 p-1.5 rounded-full hover:bg-destructive/10 hover:text-destructive transition-all"
                         title="Remove file"
                     >
-                        <BsFileEarmarkX className="text-lg" />
+                        <BsX className="text-lg" />
                     </button>
                 )}
             </div>

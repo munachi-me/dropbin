@@ -32,7 +32,7 @@ export default function Page() {
     const router = useRouter()
     const [file, setFile] = useState<FileData>({})
     const [loading, setLoading] = useState<boolean>(true)
-    const [notFound, setNotFound] = useState<boolean>(false)
+    const [errCode, setErrCode] = useState<string>('')
     const [deleting, setDeleting] = useState<boolean>(false)
     
     // Use the toast hook
@@ -59,7 +59,7 @@ export default function Page() {
             const errorMessage = error instanceof Error ? error.message : 'Failed to load file'
             toastError(errorMessage)
             setLoading(false)
-            setNotFound(true)
+            setErrCode(errorMessage)
         }
     }
 
@@ -111,14 +111,14 @@ export default function Page() {
     }
 
     // If file not found
-    if (!file || Object.keys(file).length === 0 || notFound) {
+    if (!file || Object.keys(file).length === 0 || errCode) {
         return (
             <div className="w-full flex min-h-[100dvh] items-center justify-center px-4 py-24">
-                <div className="w-full max-w-md rounded-xl border flex flex-col items-center gap-4 p-8 bg-secondary/50 shadow-lg">
-                    <BsX className="text-4xl text-destructive" />
-                    <h2 className="text-xl font-semibold">File Not Found</h2>
-                    <p className="text-sm text-foreground/60 text-center">
-                        The file you're looking for doesn't exist or has been deleted.
+                <div className="w-full max-w-md rounded-xl border flex flex-col items-center justify-start gap-4 p-8 bg-secondary/50 shadow-lg">
+                    <i className="p-4 rounded-sm text-destructive bg-destructive/10"><BsFileEarmarkX /></i>
+                    <h2 className="text-xl font-semibold">Error fetching drop.</h2>
+                    <p className="text-foreground/60 text-center">
+                        {errCode}
                     </p>
                     <Link href="/" className="text-primary hover:underline text-sm">
                         Return to home

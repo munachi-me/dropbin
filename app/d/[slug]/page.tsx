@@ -39,7 +39,7 @@ export default function Page() {
     const [file, setFile] = useState<FileData>({})
     const [lock, setLock] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(true)
-    const [notFound, setNotFound] = useState<boolean>(false)
+    const [errCode, setErrCode] = useState<string>('')
     const [downloading, setDownloading] = useState<boolean>(false)
     const passwordRef = useRef<HTMLInputElement>(null)
     
@@ -69,7 +69,7 @@ export default function Page() {
             const errorMessage = error instanceof Error ? error.message : 'Failed to load file'
             toastError(errorMessage)
             setLoading(false)
-            setNotFound(true)
+            setErrCode(errorMessage)
         }
     }
 
@@ -200,14 +200,14 @@ export default function Page() {
     }
 
     // If file not found
-    if (!file || Object.keys(file).length === 0 || notFound) {
+    if (!file || Object.keys(file).length === 0 || errCode) {
         return (
             <div className="w-full flex min-h-[100dvh] items-center justify-center px-4 py-24">
-                <div className="w-full max-w-md rounded-xl border flex flex-col items-center gap-4 p-8 bg-secondary/50 shadow-lg">
-                    <BsX className="text-4xl text-destructive" />
-                    <h2 className="text-xl font-semibold">File Not Found</h2>
-                    <p className="text-sm text-foreground/60 text-center">
-                        The file you're looking for doesn't exist or has been deleted.
+                <div className="w-full max-w-md rounded-xl border flex flex-col items-center justify-start gap-4 p-8 bg-secondary/50 shadow-lg">
+                    <i className="p-4 rounded-sm text-destructive bg-destructive/10"><BsFileEarmarkX /></i>
+                    <h2 className="text-xl font-semibold">Error fetching drop.</h2>
+                    <p className="text-foreground/60 text-center">
+                        {errCode}
                     </p>
                     <Link href="/" className="text-primary hover:underline text-sm">
                         Return to home
@@ -246,13 +246,10 @@ export default function Page() {
             </div>
             :
             <div className="w-full max-w-3xl rounded-xl border flex flex-col items-center justify-center bg-secondary/50 shadow-lg">
-                <div className="flex gap-4 items-center w-full justify-between border-b p-6">
-                    <div className="flex items-center gap-2 text-primary text-sm">
-                        <img src='/dropbin_icon.png' alt="DropBin Logo" className="w-auto h-[1em]" />
-                        <h3 className="text-foreground font-bold">DropBin</h3>
-                    </div>
-                    <span className="text-xs mono-font">
-                        Secure transfer
+                <div className="flex gap-8 items-center w-full justify-between border-b p-6">
+                    <img src='/dropbin_icon.png' alt="DropBin Logo" className="w-auto h-[1em]" />
+                    <span className="text-xs mono-font truncate">
+                        {slug}
                     </span>
                 </div>
 
@@ -276,7 +273,7 @@ export default function Page() {
                     <div className="p-4 border rounded-lg bg-secondary flex flex-col gap-1 shadow-lg" style={{flex: '1 0 45%'}}>
                         <p className="flex items-center gap-2 font-semibold text-foreground/50 text-xs">
                             <i className="text-primary"><BsCloudDownload /></i> 
-                            <span>Downloads left</span> 
+                            <span>Downloads</span> 
                         </p>
                         <span className="mono-font">
                             {file.download_limit !== null && file.download_limit !== undefined 
