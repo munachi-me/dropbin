@@ -53,10 +53,10 @@ function ToastItem({ toast, onClose }: ToastItemProps) {
     }
 
     const styles: Record<ToastType, string> = {
-        success: 'border-success bg-success/10 text-success',
-        error: 'border-destructive bg-destructive text-destructive',
-        warning: 'border-warning bg-warning/10 text-warning',
-        info: 'border-primary bg-primary/10 text-primary',
+        success: 'border-success text-success',
+        error: 'border-destructive text-destructive',
+        warning: 'border-warning text-warning',
+        info: 'border-primary text-primary',
     }
 
     const iconColors: Record<ToastType, string> = {
@@ -67,8 +67,7 @@ function ToastItem({ toast, onClose }: ToastItemProps) {
     }
 
     return (
-        <div className={`flex items-center gap-3 p-4 rounded-xl border ${styles[toast.type]} shadow-lg animate-in slide-in-from-top-2 duration-300 max-w-md w-full
-        bg-secondary`}>
+        <div className={`font-bold bg-secondary flex items-center gap-3 p-4 rounded-xl border ${styles[toast.type]} shadow-lg animate-in slide-in-from-top-2 duration-300 max-w-md w-full`}>
             <span className={`text-xl flex-shrink-0 ${iconColors[toast.type]}`}>
                 {icons[toast.type]}
             </span>

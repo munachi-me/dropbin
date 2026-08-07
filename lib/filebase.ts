@@ -28,6 +28,14 @@ interface DeleteResult {
     error?: Error
 }
 
+// Debug environment variables
+console.log('Filebase Config:', {
+    endpoint: env.filebaseEndpoint,
+    bucket: env.filebaseBucket,
+    hasKey: !!env.filebaseKey,
+    hasSecret: !!env.filebaseSecret,
+})
+
 // Validate required env vars
 if (!env.filebaseBucket || !env.filebaseKey || !env.filebaseSecret) {
     throw new Error('Missing required Filebase environment variables')
