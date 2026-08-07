@@ -41,14 +41,6 @@ export async function GET(request: Request): Promise<NextResponse> {
             )
         }
 
-        // Validate ID format (optional)
-        if (id.length < 8 || id.length > 64) {
-            return NextResponse.json(
-                { error: 'Invalid drop ID format' },
-                { status: 400 }
-            )
-        }
-
         // Fetch file from database
         const { data: file, error }: { 
             data: FileData | null, 

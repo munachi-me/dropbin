@@ -23,6 +23,7 @@ interface FileMetadata {
     created_at: string
     drop_url: string
     admin_url: string
+    timer: number
 }
 
 interface TimeOption {
@@ -130,8 +131,10 @@ export default function Drop() {
                 formData.append('downloadLimit', downloadLimit.toString())
                 
                 const expiresAt = new Date()
+                const timer = autoDelete.value * 1000
                 expiresAt.setSeconds(expiresAt.getSeconds() + autoDelete.value)
                 formData.append('expiresAt', expiresAt.toISOString())
+                formData.append('timer', timer))
                 
                 if (password) {
                     formData.append('password', password)

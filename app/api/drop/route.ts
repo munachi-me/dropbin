@@ -42,6 +42,7 @@ interface FileMetadata {
     password: string | null
     created_at: string
     updated_at: string
+    timer: number
 }
 
 interface UploadResponse {
@@ -96,16 +97,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             return NextResponse.json(errorResponse, { status: 400 })
         }
 
-        // // Validate file type (optional - remove if you want to accept all files)
-        // if (!ALLOWED_MIME_TYPES.includes(file.type) && !file.type.startsWith('image/')) {
-        //     console.warn(`⚠️ File type not in allowed list: ${file.type}`)
-        //     // Uncomment to reject:
-        //     // return NextResponse.json(
-        //     //     { error: `File type ${file.type} is not allowed` },
-        //     //     { status: 400 }
-        //     // )
-        // }
-
         // Generate unique IDs
         const fileId = uuid()
         const adminId = uuid()
@@ -149,6 +140,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             password: password ? password.toString() : null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
+            timer: file.timer,
         }
 
         console.log('📝 Metadata:', metadata)
@@ -200,6 +192,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 admin_url: adminUrl,
             }
         }
+
+        setTimeout(() => {
+            await fetch(`/api/bin?id=${fileId}`, { method: 'DELETE' })
+        }, file.timer+(1000*60*10));
 
         return NextResponse.json(responseData, { status: 201 })
 
