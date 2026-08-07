@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import {
     BsDot, BsShieldCheck, BsClock, BsCloudDownload,
-    BsLock, BsUnlock, BsDownload, BsX,
+    BsLock, BsUnlock, BsDownload, BsX, BsFileEarmarkX,
 } from 'react-icons/bs'
 import FileCard from '@/components/filecard'
 import { useToast } from '@/components/toast'
