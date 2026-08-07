@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import {
     BsDot, BsShieldCheck, BsClock, BsCloudDownload,
     BsLock, BsTrash, BsBoxArrowUpRight, BsPencil, BsX,
+    BsFileEarmarkX,
 } from 'react-icons/bs'
 import FileCard from '@/components/filecard'
 import Link from 'next/link'
