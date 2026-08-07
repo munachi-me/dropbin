@@ -264,7 +264,7 @@ export default function Drop() {
             setToast(prev => [tst, ...prev])
         }
     }
-    const closeT = (id) => {
+    const closeT = (id: string) => {
         const newT = toast.filter(t => t.id != id)
         setToast(newT)
     }

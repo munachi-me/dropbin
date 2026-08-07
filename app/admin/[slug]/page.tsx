@@ -97,7 +97,7 @@ export default function Page() {
         }
     }
 
-    const closeT = (id) => {
+    const closeT = (id: string) => {
         const newT = toast.filter(t => t.id != id)
         setToast(newT)
     }
