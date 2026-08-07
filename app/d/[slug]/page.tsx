@@ -7,7 +7,7 @@ import {
     BsLock, BsUnlock, BsDownload, BsX, BsFileEarmarkX,
 } from 'react-icons/bs'
 import FileCard from '@/components/filecard'
-import { useToast } from '@/components/toast'
+import { success, errorT, warning, info, ToastContainer, Toast } from '@/components/toast' // Import the toast hook
 
 // Types
 interface FileData {
@@ -42,9 +42,8 @@ export default function Page() {
     const [errCode, setErrCode] = useState<string>('')
     const [downloading, setDownloading] = useState<boolean>(false)
     const passwordRef = useRef<HTMLInputElement>(null)
-    
-    // Use the toast hook
-    const { success, error: toastError, warning, info } = useToast()
+    const [toast, setToast] = useState<Toast[]>([])
+
 
     async function fetchFile() {
         setLoading(true)
@@ -62,14 +61,16 @@ export default function Page() {
             
             if (data.password) {
                 setLock(true)
-                info('This file is password protected')
+                const tst: Toast = info('This file is password protected')
+                setToast(prev => [tst, ...prev])
             }
         } catch (error) {
             console.error('Error:', error)
             const errorMessage = error instanceof Error ? error.message : 'Failed to load file'
-            toastError(errorMessage)
             setLoading(false)
             setErrCode(errorMessage)
+            const tst: Toast = errorT(errorMessage)
+            setToast(prev => [tst, ...prev])
         }
     }
 
@@ -82,9 +83,11 @@ export default function Page() {
         
         if (enteredPassword === file.password) {
             setLock(false)
-            success('Access granted!')
+            const txt: Toast = success('Access granted!')
+            setToast(prev => [tst, ...prev])
         } else {
-            toastError('Access denied! Incorrect password.')
+            const tst: Toast = errorT('Access denied! Incorrect password.')
+            setToast(prev => [tst, ...prev])
         }
     }
 
@@ -104,7 +107,8 @@ export default function Page() {
 
             // Check if download limit is reached
             if (data.remaining_downloads !== null && data.remaining_downloads < 0) {
-                toastError('Download limit reached!')
+                const tst: Toast = info('Download limit reached!')
+                setToast(prev => [tst, ...prev])
                 setDownloading(false)
                 return
             }
@@ -119,9 +123,11 @@ export default function Page() {
 
             // Show success message with remaining downloads
             if (data.remaining_downloads !== null) {
-                success(`Download started! ${data.remaining_downloads} download${data.remaining_downloads !== 1 ? 's' : ''} remaining`)
+                const tst: Toast = success(`Download started! ${data.remaining_downloads} download${data.remaining_downloads !== 1 ? 's' : ''} remaining`)
+                setToast(prev => [tst, ...prev])
             } else {
-                success('Download started!')
+                const tst: Toast = success('Download started!')
+                setToast(prev => [tst, ...prev])
             }
             
             fetchFile()
@@ -129,59 +135,16 @@ export default function Page() {
         } catch (error) {
             console.error('Error downloading:', error)
             const errorMessage = error instanceof Error ? error.message : 'Download failed'
-            toastError(errorMessage)
+            const tst: Toast = errorT(errorMessage)
+            setToast(prev => [tst, ...prev])
         } finally {
             setDownloading(false)
         }
     }
 
-    // Alternative download method using fetch + blob
-    async function downloadFileWithBlob() {
-        if (downloading || !slug) return
-        
-        setDownloading(true)
-        
-        try {
-            // Get the presigned URL
-            const res = await fetch(`/api/download?id=${slug}`, { method: 'GET' })
-            const data: DownloadResponse = await res.json()
-            
-            if (!res.ok) {
-                throw new Error(data as unknown as string || 'Download Failed')
-            }
-
-            // Fetch the actual file from presigned URL
-            const fileResponse = await fetch(data.download_url)
-            if (!fileResponse.ok) {
-                throw new Error('Failed to fetch file')
-            }
-            
-            const blob = await fileResponse.blob()
-            
-            // Create a download link
-            const url = window.URL.createObjectURL(blob)
-            const link = document.createElement('a')
-            link.href = url
-            link.download = data.filename
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-            
-            // Clean up
-            window.URL.revokeObjectURL(url)
-
-            // Update the file state
-            fetchFile()
-            
-            success('Download complete!')
-
-        } catch (error) {
-            console.error('Error downloading:', error)
-            const errorMessage = error instanceof Error ? error.message : 'Download failed'
-            toastError(errorMessage)
-        } finally {
-            setDownloading(false)
-        }
+    const closeT = (id) => {
+        const newT = toast.filter(t => t.id != id)
+        setToast(newT)
     }
 
     // Loading state
@@ -203,7 +166,7 @@ export default function Page() {
     if (!file || Object.keys(file).length === 0 || errCode) {
         return (
             <div className="w-full flex min-h-[100dvh] items-center justify-center px-4 py-24">
-                <div className="w-full max-w-md rounded-xl border flex flex-col items-center justify-start gap-4 p-8 bg-secondary/50 shadow-lg">
+                <div className="w-full max-w-md rounded-xl border flex flex-col items-center gap-4 p-8 bg-secondary/50 shadow-lg">
                     <i className="p-4 rounded-sm text-destructive bg-destructive/10"><BsFileEarmarkX /></i>
                     <h2 className="text-xl font-semibold">Error fetching drop.</h2>
                     <p className="text-foreground/60 text-center">
@@ -219,6 +182,7 @@ export default function Page() {
 
     return (
         <div className="w-full flex min-h-[100dvh] items-center justify-center px-4 py-24">
+            <ToastContainer toasts={toast} onClose={closeT} />
             {lock ? 
             <div className="w-full max-w-xl rounded-xl border flex flex-col gap-4 p-6 items-start bg-secondary/50 shadow-lg">                
                 <i className="p-4 rounded-sm text-primary bg-primary/10"><BsLock /></i>

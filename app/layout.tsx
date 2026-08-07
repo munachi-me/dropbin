@@ -3,7 +3,6 @@ import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/nav";
 import Footer from "@/components/footer";
-import { ToastProvider } from '@/components/toast'
 
 export const metadata: Metadata = {
   title: { default: 'DropBin — Drop. Share. Done.', template: '%s | DropBin' },
@@ -46,14 +45,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${space_grotesk.variable} ${inter.variable} ${jetbrains_mono.variable} h-full antialiased`}>
       <body className={`min-h-full flex flex-col`}>
-        <ToastProvider>
-          <input type="checkbox" id="theme" className="hidden" />
-          <div className="root">
-            <Nav />
-            {children}
-            <Footer />
-          </div>
-        </ToastProvider>
+        <input type="checkbox" id="theme" className="hidden" />
+        <div className="root">
+          <Nav />
+          {children}
+          <Footer />
+        </div>
       </body>
     </html>
   );

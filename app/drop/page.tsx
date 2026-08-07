@@ -9,7 +9,7 @@ import {
 } from "react-icons/bs"
 import Link from 'next/link'
 import FileCard from '@/components/filecard'
-import { useToast } from '@/components/toast' // Import the toast hook
+import { success, errorT, warning, info, ToastContainer, Toast } from '@/components/toast' // Import the toast hook
 
 // Types
 interface FileMetadata {
@@ -55,12 +55,10 @@ export default function Drop() {
     const [uploadedFiles, setUploadedFiles] = useState<FileMetadata[]>([])
     const [isComplete, setIsComplete] = useState<boolean>(false)
     const [error, setError] = useState<string>('')
+    const [toast, setToast] = useState<Toast[]>([])
     
     const fileInputRef = useRef<HTMLInputElement>(null)
     const dropZoneRef = useRef<HTMLDivElement>(null)
-    
-    // Use the toast hook
-    const { success, error: toastError, warning, info } = useToast()
 
     // Handle file selection
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,7 +74,8 @@ export default function Drop() {
         const validFiles = newFiles.filter(file => {
             if (file.size > MAX_FILE_SIZE) {
                 setError(`File "${file.name}" exceeds the 100MB limit`)
-                warning(`File "${file.name}" exceeds the 100MB limit`)
+                const tst: Toast = warning(`File "${file.name}" exceeds the 100MB limit`)
+                setToast(prev => [tst, ...prev])
                 return false
             }
             return true
@@ -88,28 +87,32 @@ export default function Drop() {
 
         setFiles(prev => [...prev, ...validFiles])
         setError('')
-        info(`${validFiles.length} file${validFiles.length > 1 ? 's' : ''} added`)
+        const tst: Toast = info(`${validFiles.length} file${validFiles.length > 1 ? 's' : ''} added`)
+        setToast(prev => [tst, ...prev])
     }
 
     // Remove a file
     const removeFile = (index: number) => {
         const removed = files[index]
         setFiles(prev => prev.filter((_, i) => i !== index))
-        warning(`Removed "${removed.name}"`)
+        const tst: Toast = warning(`Removed "${removed.name}"`)
+        setToast(prev => [tst, ...prev])
     }
 
     // Clear all files
     const clearFiles = () => {
         setFiles([])
         setError('')
-        info('All files cleared')
+        const tst: Toast = info('All files cleared')
+        setToast(prev => [tst, ...prev])
     }
 
     // Upload files
     const uploadFiles = async () => {
         if (files.length === 0) {
             setError('Please select at least one file')
-            warning('Please select at least one file')
+            const tst: Toast = warning('Please select at least one file')
+            setToast(prev => [tst, ...prev])
             return
         }
 
@@ -158,7 +161,8 @@ export default function Drop() {
                 console.error('Upload error for file:', file.name, error)
                 const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
                 setError(`Failed to upload "${file.name}": ${errorMessage}`)
-                toastError(`Failed to upload "${file.name}"`)
+                const tst: Toast = errorT(`Failed to upload "${file.name}"`)
+                setToast(prev => [tst, ...prev])
                 break
             }
         }
@@ -167,7 +171,8 @@ export default function Drop() {
             setUploadedFiles(uploaded)
             setIsComplete(true)
             setFiles([])
-            success(`${uploaded.length} file${uploaded.length > 1 ? 's' : ''} uploaded successfully!`)
+            const tst: Toast = success(`${uploaded.length} file${uploaded.length > 1 ? 's' : ''} uploaded successfully!`)
+            setToast(prev => [tst, ...prev])
         }
 
         setUploading(false)
@@ -177,7 +182,8 @@ export default function Drop() {
     const copyToClipboard = async (text: string) => {
         try {
             await navigator.clipboard.writeText(text)
-            success('Link copied to clipboard!')
+            const tst: Toast = success('Link copied to clipboard!')
+            setToast(prev => [tst, ...prev])
         } catch (error) {
             console.error('Copy error:', error)
             // Fallback
@@ -188,7 +194,8 @@ export default function Drop() {
                 textarea.select()
                 document.execCommand('copy')
                 document.body.removeChild(textarea)
-                success('Link copied to clipboard!')
+                const tst: Toast = success('Link copied to clipboard!')
+                setToast(prev => [tst, ...prev])
             } catch (fallbackError) {
                 toastError('Failed to copy link')
             }
@@ -205,7 +212,8 @@ export default function Drop() {
         setPassword('')
         setDownloadLimit(5)
         setAutoDelete(timeOptions[2])
-        info('Ready for new upload')
+        const tst: Toast = info('Ready for new upload')
+        setToast(prev => [tst, ...prev])
     }
 
     // Drag and drop handlers
@@ -252,8 +260,13 @@ export default function Drop() {
     const testConnection = async () => {
         const res = await fetch('/api')
         if(res.ok){
-            info('Welcome to DropBin! Drop your files to get started.')
+            const tst: Toast = info('Welcome to DropBin! Drop your files to get started.')
+            setToast(prev => [tst, ...prev])
         }
+    }
+    const closeT = (id) => {
+        const newT = toast.filter(t => t.id != id)
+        setToast(newT)
     }
 
     useEffect(() => {
@@ -263,14 +276,15 @@ export default function Drop() {
     // Success View
     if (isComplete) {
         return (
-            <div className="w-full flex items-center justify-center px-4 py-28">
+            <div className="w-full flex items-center min-h-[100dvh] justify-center px-4 py-28">
+                <ToastContainer toasts={toast} onClose={closeT} />
                 <div className="w-full max-w-3xl rounded-xl border flex flex-col items-center justify-center gap-6 bg-secondary/50 p-8 shadow-lg">
                     <div className="flex items-center gap-3 w-full">
-                        <span className="p-3 rounded-full bg-green-500/10 text-green-500 text-2xl">
+                        <span className="p-2 rounded-full bg-success/10 text-success text-2xl">
                             <BsCheckCircle />
                         </span>
                         <span className="flex flex-col w-full items-start gap-1">
-                            <h2 className="text-lg font-semibold">Upload Complete! 🎉</h2>
+                            <h2 className="text-lg font-semibold">Upload Complete!</h2>
                             <p className="text-foreground/60 text-sm">
                                 {uploadedFiles.length} file{uploadedFiles.length > 1 ? 's' : ''} uploaded successfully
                             </p>
@@ -360,6 +374,7 @@ export default function Drop() {
 
     return (
         <>
+            <ToastContainer toasts={toast} onClose={closeT} />
             {/* Hero Section */}
             <div className="w-full mx-auto pt-24 pb-12 px-4 flex flex-col justify-center items-center gap-4 grid-bg">
                 <span className="flex items-center gap-2 text-xs text-foreground/60 py-1 px-3 rounded-lg border bg-secondary">

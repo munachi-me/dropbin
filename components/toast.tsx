@@ -14,6 +14,7 @@ import {
     BsClock,
     BsX 
 } from "react-icons/bs"
+import { v7 as uuid } from "uuid";
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info'
 
@@ -39,35 +40,35 @@ function ToastItem({ toast, onClose }: ToastItemProps) {
     useEffect(() => {
         const timer = setTimeout(() => {
             onClose(toast.id)
-        }, toast.duration || 5000)
+        }, 5000)
         
         return () => clearTimeout(timer)
     }, [toast.id, toast.duration, onClose])
 
     const icons: Record<ToastType, ReactNode> = {
-        success: <BsCheck2 className="text-green-500" />,
-        error: <BsXCircle className="text-red-500" />,
-        warning: <BsExclamationTriangle className="text-yellow-500" />,
-        info: <BsClock className="text-blue-500" />,
+        success: <BsCheck2 className="text-success" />,
+        error: <BsXCircle className="text-destructive" />,
+        warning: <BsExclamationTriangle className="text-warning" />,
+        info: <BsClock className="text-primary" />,
     }
 
     const styles: Record<ToastType, string> = {
-        success: 'border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-300',
-        error: 'border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-300',
-        warning: 'border-yellow-500/30 bg-yellow-500/10 text-yellow-700 dark:text-yellow-300',
-        info: 'border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300',
+        success: 'border-success bg-success/10 text-success',
+        error: 'border-destructive bg-destructive text-destructive',
+        warning: 'border-warning bg-warning/10 text-warning',
+        info: 'border-primary bg-primary/10 text-primary',
     }
 
     const iconColors: Record<ToastType, string> = {
-        success: 'text-green-500',
-        error: 'text-red-500',
-        warning: 'text-yellow-500',
-        info: 'text-blue-500',
+        success: 'text-success',
+        error: 'text-destructive',
+        warning: 'text-warning',
+        info: 'text-primary',
     }
 
     return (
         <div className={`flex items-center gap-3 p-4 rounded-xl border ${styles[toast.type]} shadow-lg animate-in slide-in-from-top-2 duration-300 max-w-md w-full
-        absolute bottom-8 right-8 z-index-11 bg-secondary`}>
+        bg-secondary`}>
             <span className={`text-xl flex-shrink-0 ${iconColors[toast.type]}`}>
                 {icons[toast.type]}
             </span>
@@ -98,75 +99,32 @@ export function ToastContainer({ toasts, onClose }: ToastContainerProps) {
     )
 }
 
-// Custom hook for toast notifications
-export function useToast() {
-    const [toasts, setToasts] = useState<Toast[]>([])
-
-    const addToast = (toast: Omit<Toast, 'id'>) => {
-        const id = Math.random().toString(36).substring(7)
-        setToasts((prev) => [...prev, { ...toast, id }])
-        
-        // Auto-remove toast after duration
-        if (toast.duration !== 0) {
-            setTimeout(() => {
-                setToasts((prev) => prev.filter((t) => t.id !== id))
-            }, toast.duration || 5000)
-        }
-    }
-
-    const removeToast = (id: string) => {
-        setToasts((prev) => prev.filter((toast) => toast.id !== id))
-    }
-
-    const clearAllToasts = () => {
-        setToasts([])
-    }
-
+// Toast Functions
+export function success(m: string) <Toast> {
     return {
-        toasts,
-        addToast,
-        removeToast,
-        clearAllToasts,
-        success: (message: string, duration?: number) => 
-            addToast({ type: 'success', message, duration }),
-        error: (message: string, duration?: number) => 
-            addToast({ type: 'error', message, duration }),
-        warning: (message: string, duration?: number) => 
-            addToast({ type: 'warning', message, duration }),
-        info: (message: string, duration?: number) => 
-            addToast({ type: 'info', message, duration }),
+        id: uuid(),
+        type: 'success',
+        message: m
     }
 }
-
-// Toast Context for global toast management
-interface ToastContextType {
-    toasts: Toast[]
-    addToast: (toast: Omit<Toast, 'id'>) => void
-    removeToast: (id: string) => void
-    clearAllToasts: () => void
-    success: (message: string, duration?: number) => void
-    error: (message: string, duration?: number) => void
-    warning: (message: string, duration?: number) => void
-    info: (message: string, duration?: number) => void
-}
-
-const ToastContext = createContext<ToastContextType | undefined>(undefined)
-
-export function ToastProvider({ children }: { children: ReactNode }) {
-    const toastHook = useToast()
-
-    return (
-        <ToastContext.Provider value={toastHook}>
-            {children}
-            <ToastContainer toasts={toastHook.toasts} onClose={toastHook.removeToast} />
-        </ToastContext.Provider>
-    )
-}
-
-export function useToastContext() {
-    const context = useContext(ToastContext)
-    if (!context) {
-        throw new Error('useToastContext must be used within a ToastProvider')
+export function errorT(m: string) <Toast> {
+    return {
+        id: uuid(),
+        type: 'error',
+        message: m
     }
-    return context
+}
+export function warning(m: string) <Toast> {
+    return {
+        id: uuid(),
+        type: 'warning',
+        message: m
+    }
+}
+export function info(m: string) <Toast> {
+    return {
+        id: uuid(),
+        type: 'info',
+        message: m
+    }
 }
