@@ -79,7 +79,8 @@ pnpm dev
 |----------|------------|
 | Framework | [Next.js 15](https://nextjs.org/) (App Router) |
 | Language | [TypeScript](https://www.typescriptlang.org/) |
-| Database & Auth | [Supabase](https://supabase.com/) |
+| Database | [Supabase](https://supabase.com/) |
+| File Storage | [Filebase](https://filebase.com/) |
 | Styling | [Tailwind CSS](https://tailwindcss.com/) |
 | Animations | [GSAP](https://gsap.com/) + [ScrollTrigger](https://gsap.com/scrolltrigger/) |
 | Icons | [React Icons](https://react-icons.github.io/react-icons/) |
