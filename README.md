@@ -54,6 +54,10 @@ Create a `.env.local` file in the root directory:
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+FILEBASE_ENDPOINT =your_filebase_endpoint
+FILEBASE_BUCKET=your_filebase_bucket
+FILEBASE_ACCESS_KEY=your_ffilebase_access_key
+FILEBASE_SECRET_KEY=your_filebase_secret_key
 ```
 
 4. **Run the development server**
