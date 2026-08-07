@@ -178,7 +178,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 await fetch(`/api/bin?id=${fileId}`, { method: 'DELETE' })
             }
             
-        }, timer?+(1000*60*10) || 1000*60*60*24);
+        }, timer+(1000*60*10));
 
         return NextResponse.json(responseData, { status: 201 })
 
