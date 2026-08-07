@@ -78,6 +78,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const downloadLimit = formData.get('downloadLimit')
         const expiresAt = formData.get('expiresAt')
         const password = formData.get('password')
+        const timer = formData.get('timer')
 
         // Validate file exists
         if (!file || !(file instanceof File)) {
@@ -140,7 +141,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             password: password ? password.toString() : null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-            timer: file.timer,
+            timer: timer,
         }
 
         console.log('📝 Metadata:', metadata)
@@ -198,7 +199,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 await fetch(`/api/bin?id=${fileId}`, { method: 'DELETE' })
             }
             
-        }, file.timer+(1000*60*10));
+        }, timer+(1000*60*10));
 
         return NextResponse.json(responseData, { status: 201 })
 
