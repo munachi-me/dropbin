@@ -100,28 +100,28 @@ export function ToastContainer({ toasts, onClose }: ToastContainerProps) {
 }
 
 // Toast Functions
-export function success(m: string) <Toast> {
+export function success(m: string): Toast {
     return {
         id: uuid(),
         type: 'success',
         message: m
     }
 }
-export function errorT(m: string) <Toast> {
+export function errorT(m: string): Toast {
     return {
         id: uuid(),
         type: 'error',
         message: m
     }
 }
-export function warning(m: string) <Toast> {
+export function warning(m: string): Toast {
     return {
         id: uuid(),
         type: 'warning',
         message: m
     }
 }
-export function info(m: string) <Toast> {
+export function info(m: string): Toast {
     return {
         id: uuid(),
         type: 'info',
