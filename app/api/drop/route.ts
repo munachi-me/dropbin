@@ -6,26 +6,6 @@ import { PostgrestError } from '@supabase/supabase-js'
 
 // Constants
 const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB
-const ALLOWED_MIME_TYPES = [
-    // Images
-    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
-    // Documents
-    'application/pdf', 'application/msword', 
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/vnd.ms-powerpoint',
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    // Text
-    'text/plain', 'text/csv', 'text/html', 'text/css', 'text/javascript',
-    // Archives
-    'application/zip', 'application/x-zip-compressed',
-    'application/x-rar-compressed', 'application/x-7z-compressed',
-    // Audio
-    'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/aac',
-    // Video
-    'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm',
-]
 
 // Types
 interface FileMetadata {
@@ -42,7 +22,6 @@ interface FileMetadata {
     password: string | null
     created_at: string
     updated_at: string
-    timer: number
 }
 
 interface UploadResponse {
@@ -78,7 +57,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const downloadLimit = formData.get('downloadLimit')
         const expiresAt = formData.get('expiresAt')
         const password = formData.get('password')
-        const timer = formData.get('timer')
+        const timeCount = formData.get('timer')
+        const timer: number = Number(timeCount) || 1000*60*60*24
 
         // Validate file exists
         if (!file || !(file instanceof File)) {
@@ -141,7 +121,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             password: password ? password.toString() : null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-            timer: timer,
         }
 
         console.log('📝 Metadata:', metadata)
@@ -199,7 +178,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 await fetch(`/api/bin?id=${fileId}`, { method: 'DELETE' })
             }
             
-        }, timer+(1000*60*10));
+        }, timer?+(1000*60*10) || 1000*60*60*24);
 
         return NextResponse.json(responseData, { status: 201 })
 
