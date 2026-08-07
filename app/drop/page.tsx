@@ -134,7 +134,7 @@ export default function Drop() {
                 const timer = autoDelete.value * 1000
                 expiresAt.setSeconds(expiresAt.getSeconds() + autoDelete.value)
                 formData.append('expiresAt', expiresAt.toISOString())
-                formData.append('timer', timer))
+                formData.append('timer', timer)
                 
                 if (password) {
                     formData.append('password', password)
