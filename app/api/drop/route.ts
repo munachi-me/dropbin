@@ -194,7 +194,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         }
 
         setTimeout(() => {
-            await fetch(`/api/bin?id=${fileId}`, { method: 'DELETE' })
+            async () => {
+                await fetch(`/api/bin?id=${fileId}`, { method: 'DELETE' })
+            }
+            
         }, file.timer+(1000*60*10));
 
         return NextResponse.json(responseData, { status: 201 })
