@@ -197,7 +197,8 @@ export default function Drop() {
                 const tst: Toast = success('Link copied to clipboard!')
                 setToast(prev => [tst, ...prev])
             } catch (fallbackError) {
-                toastError('Failed to copy link')
+                const tst: Toast = errorT('Failed to copy link')
+                setToast(prev => [tst, ...prev])
             }
         }
     }
