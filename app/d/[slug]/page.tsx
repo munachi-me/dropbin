@@ -83,7 +83,7 @@ export default function Page() {
         
         if (enteredPassword === file.password) {
             setLock(false)
-            const txt: Toast = success('Access granted!')
+            const tst: Toast = success('Access granted!')
             setToast(prev => [tst, ...prev])
         } else {
             const tst: Toast = errorT('Access denied! Incorrect password.')
