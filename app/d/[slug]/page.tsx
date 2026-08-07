@@ -211,7 +211,7 @@ export default function Page() {
             :
             <div className="w-full max-w-3xl rounded-xl border flex flex-col items-center justify-center bg-secondary/50 shadow-lg">
                 <div className="flex gap-8 items-center w-full justify-between border-b p-6">
-                    <img src='/dropbin_icon.png' alt="DropBin Logo" className="w-auto h-[1em]" />
+                    <img src='/dropbin_icon.png' alt="DropBin Logo" className="w-auto h-[1.5em]" />
                     <span className="text-xs mono-font truncate">
                         {slug}
                     </span>
