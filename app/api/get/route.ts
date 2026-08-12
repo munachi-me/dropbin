@@ -104,6 +104,7 @@ export async function GET(request: Request): Promise<NextResponse> {
 
         // Check if file is expired
         if (file.expires_at && new Date(file.expires_at) < new Date()) {
+            await fetch(`/api/bin?id=${file.file_id}`, { method: 'DELETE' })
             return NextResponse.json(
                 { 
                     error: 'Drop has expired',
