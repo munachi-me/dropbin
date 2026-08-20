@@ -7,7 +7,7 @@ import {
     BsLock, BsUnlock, BsDownload, BsX, BsFileEarmarkX,
 } from 'react-icons/bs'
 import FileCard from '@/components/filecard'
-import { success, errorT, warning, info, ToastContainer, Toast } from '@/components/toast' // Import the toast hook
+import { success, errorT, warning, info, ToastContainer } from '@/components/toast' // Remove Toast import if it's a type
 
 // Types
 interface FileData {
@@ -34,6 +34,13 @@ interface DownloadResponse {
     remaining_downloads: number | null
 }
 
+// Define Toast type locally
+interface Toast {
+    id: string
+    message: string
+    type: 'success' | 'error' | 'warning' | 'info'
+}
+
 export default function Page() {
     const { slug } = useParams<{ slug: string }>()
     const [file, setFile] = useState<FileData>({})
@@ -42,12 +49,14 @@ export default function Page() {
     const [errCode, setErrCode] = useState<string>('')
     const [downloading, setDownloading] = useState<boolean>(false)
     const passwordRef = useRef<HTMLInputElement>(null)
-    const [toast, setToast] = useState<Toast[]>([])
-
+    const [toasts, setToasts] = useState<Toast[]>([]) // Renamed for clarity
 
     async function fetchFile() {
         setLoading(true)
-        if (!slug) return
+        if (!slug) {
+            setLoading(false)
+            return
+        }
         
         try {
             const res = await fetch(`/api/get?id=${slug}`, { method: 'GET' })
@@ -61,33 +70,41 @@ export default function Page() {
             
             if (data.password) {
                 setLock(true)
-                const tst: Toast = info('This file is password protected')
-                setToast(prev => [tst, ...prev])
+                const tst = info('This file is password protected')
+                if (tst) {
+                    setToasts(prev => [tst, ...prev])
+                }
             }
         } catch (error) {
             console.error('Error:', error)
             const errorMessage = error instanceof Error ? error.message : 'Failed to load file'
             setLoading(false)
             setErrCode(errorMessage)
-            const tst: Toast = errorT(errorMessage)
-            setToast(prev => [tst, ...prev])
+            const tst = errorT(errorMessage)
+            if (tst) {
+                setToasts(prev => [tst, ...prev])
+            }
         }
     }
 
     useEffect(() => {
         fetchFile()
-    }, [])
+    }, [slug]) // Added slug as dependency
 
     function handleUnlock() {
         const enteredPassword = passwordRef.current?.value || ''
         
         if (enteredPassword === file.password) {
             setLock(false)
-            const tst: Toast = success('Access granted!')
-            setToast(prev => [tst, ...prev])
+            const tst = success('Access granted!')
+            if (tst) {
+                setToasts(prev => [tst, ...prev])
+            }
         } else {
-            const tst: Toast = errorT('Access denied! Incorrect password.')
-            setToast(prev => [tst, ...prev])
+            const tst = errorT('Access denied! Incorrect password.')
+            if (tst) {
+                setToasts(prev => [tst, ...prev])
+            }
         }
     }
 
@@ -99,52 +116,67 @@ export default function Page() {
         try {
             // Get the presigned URL
             const res = await fetch(`/api/download?id=${slug}`, { method: 'GET' })
-            const data: DownloadResponse = await res.json()
             
             if (!res.ok) {
-                throw new Error(data as unknown as string || 'Download Failed')
+                const errorData = await res.json().catch(() => ({}))
+                throw new Error(errorData.error || 'Download Failed')
             }
+            
+            const data: DownloadResponse = await res.json()
 
             // Check if download limit is reached
             if (data.remaining_downloads !== null && data.remaining_downloads < 0) {
-                const tst: Toast = info('Download limit reached!')
-                setToast(prev => [tst, ...prev])
+                const tst = info('Download limit reached!')
+                if (tst) {
+                    setToasts(prev => [tst, ...prev])
+                }
                 setDownloading(false)
                 return
             }
 
             // Direct download using anchor tag
             const link = document.createElement('a')
-            // link.href = data.download_url
+            link.href = data.download_url
             link.download = data.filename
+            link.target = '_blank'
             document.body.appendChild(link)
             link.click()
-            document.body.removeChild(link)
+            
+            // Clean up after a short delay
+            setTimeout(() => {
+                document.body.removeChild(link)
+            }, 100)
 
             // Show success message with remaining downloads
             if (data.remaining_downloads !== null) {
-                const tst: Toast = success(`Download started! ${data.remaining_downloads} download${data.remaining_downloads !== 1 ? 's' : ''} remaining`)
-                setToast(prev => [tst, ...prev])
+                const tst = success(`Download started! ${data.remaining_downloads} download${data.remaining_downloads !== 1 ? 's' : ''} remaining`)
+                if (tst) {
+                    setToasts(prev => [tst, ...prev])
+                }
             } else {
-                const tst: Toast = success('Download started!')
-                setToast(prev => [tst, ...prev])
+                const tst = success('Download started!')
+                if (tst) {
+                    setToasts(prev => [tst, ...prev])
+                }
             }
             
-            fetchFile()
+            // Refresh file data to update download count
+            await fetchFile()
 
         } catch (error) {
             console.error('Error downloading:', error)
             const errorMessage = error instanceof Error ? error.message : 'Download failed'
-            const tst: Toast = errorT(errorMessage)
-            setToast(prev => [tst, ...prev])
+            const tst = errorT(errorMessage)
+            if (tst) {
+                setToasts(prev => [tst, ...prev])
+            }
         } finally {
             setDownloading(false)
         }
     }
 
     const closeT = (id: string) => {
-        const newT = toast.filter(t => t.id != id)
-        setToast(newT)
+        setToasts(prev => prev.filter(t => t.id !== id)) // Fixed: using !== instead of !=
     }
 
     // Loading state
@@ -170,7 +202,7 @@ export default function Page() {
                     <i className="p-4 rounded-sm text-destructive bg-destructive/10"><BsFileEarmarkX /></i>
                     <h2 className="text-xl font-semibold">Error fetching drop.</h2>
                     <p className="text-foreground/60 text-center">
-                        {errCode}
+                        {errCode || 'File not found'}
                     </p>
                     <Link href="/" className="text-primary hover:underline text-sm">
                         Return to home
@@ -182,7 +214,7 @@ export default function Page() {
 
     return (
         <div className="w-full flex min-h-[100dvh] items-center justify-center px-4 py-24">
-            <ToastContainer toasts={toast} onClose={closeT} />
+            <ToastContainer toasts={toasts} onClose={closeT} />
             {lock ? 
             <div className="w-full max-w-xl rounded-xl border flex flex-col gap-4 p-6 items-start bg-secondary/50 shadow-lg">                
                 <i className="p-4 rounded-sm text-primary bg-primary/10"><BsLock /></i>
@@ -211,7 +243,11 @@ export default function Page() {
             :
             <div className="w-full max-w-3xl rounded-xl border flex flex-col items-center justify-center bg-secondary/50 shadow-lg">
                 <div className="flex gap-8 items-center w-full justify-between border-b p-6">
-                    <img src='/dropbin_icon.png' alt="DropBin Logo" className="w-auto h-[1.5em]" />
+                    <img 
+                        src='/dropbin_icon.png' 
+                        alt="DropBin Logo" 
+                        className="w-auto h-[1.5em]" 
+                    />
                     <span className="text-xs mono-font truncate">
                         {slug}
                     </span>
@@ -280,4 +316,4 @@ export default function Page() {
             }
         </div>
     )
-}
+    }
