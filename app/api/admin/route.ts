@@ -60,7 +60,7 @@ export async function GET(request: Request): Promise<NextResponse> {
         const { data: file, error }: { 
             data: FileData | null, 
             error: PostgrestError | null 
-        } = await supabase
+        } = await supabase.client
             .from('files')
             .select(`
                 file_id,
