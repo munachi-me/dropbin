@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { filebase } from '@/lib/filebase' // Import filebase
 import { NextResponse } from 'next/server'
 import { PostgrestError } from '@supabase/supabase-js'
 
@@ -45,7 +46,7 @@ export async function GET(request: Request): Promise<NextResponse> {
             )
         }
 
-        // Validate ID format (optional - adjust based on your ID format)
+        // Validate ID format
         if (id.length < 8 || id.length > 64) {
             return NextResponse.json(
                 { error: 'Invalid drop ID format' },
@@ -80,7 +81,6 @@ export async function GET(request: Request): Promise<NextResponse> {
         if (error) {
             console.error('Database error:', error)
             
-            // Check if it's a "not found" error
             if (error.code === 'PGRST116') {
                 return NextResponse.json(
                     { error: 'Drop not found' },
@@ -102,12 +102,29 @@ export async function GET(request: Request): Promise<NextResponse> {
             )
         }
 
-        // Check if file is expired
+        // Check if file is expired - DELETE IF EXPIRED
         if (file.expires_at && new Date(file.expires_at) < new Date()) {
-            await fetch(`/api/bin?id=${file.file_id}`, { method: 'DELETE' })
+            console.log(`🗑️ File ${file.file_id} expired, deleting...`)
+            
+            try {
+                // Delete from Filebase
+                await filebase.delete(file.filename)
+                
+                // Delete from Supabase
+                await supabase.client
+                    .from('files')
+                    .delete()
+                    .eq('file_id', file.file_id)
+                
+                console.log(`✅ File ${file.file_id} deleted successfully`)
+            } catch (deleteError) {
+                console.error(`❌ Failed to delete expired file ${file.file_id}:`, deleteError)
+                // Even if deletion fails, return expired status
+            }
+            
             return NextResponse.json(
                 { 
-                    error: 'Drop has expired',
+                    error: 'Drop has expired and has been deleted',
                     expired: true,
                     expires_at: file.expires_at
                 },
@@ -152,7 +169,6 @@ export async function GET(request: Request): Promise<NextResponse> {
     } catch (error) {
         console.error('Error fetching drop:', error)
         
-        // Type-safe error handling
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
         
         return NextResponse.json(
