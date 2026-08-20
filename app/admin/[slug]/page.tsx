@@ -8,7 +8,7 @@ import {
 } from 'react-icons/bs'
 import FileCard from '@/components/filecard'
 import Link from 'next/link'
-import { success, errorT, warning, info, ToastContainer, Toast } from '@/components/toast' // Import the toast hook
+import { success, errorT, warning, info, ToastContainer } from '@/components/toast' // Remove Toast import if it's a type
 
 // Types
 interface FileData {
@@ -28,6 +28,13 @@ interface FileData {
     status?: string
 }
 
+// Define Toast type locally if needed
+interface Toast {
+    id: string
+    message: string
+    type: 'success' | 'error' | 'warning' | 'info'
+}
+
 export default function Page() {
     const { slug } = useParams<{ slug: string }>()
     const router = useRouter()
@@ -35,12 +42,15 @@ export default function Page() {
     const [loading, setLoading] = useState<boolean>(true)
     const [errCode, setErrCode] = useState<string>('')
     const [deleting, setDeleting] = useState<boolean>(false)
-    const [toast, setToast] = useState<Toast[]>([])
+    const [toasts, setToasts] = useState<Toast[]>([]) // Changed from toast to toasts for clarity
 
     // Fetch file data
     async function fetchFile() {
         setLoading(true)
-        if (!slug) return           
+        if (!slug) {
+            setLoading(false)
+            return
+        }           
         
         try {                
             const res = await fetch(`/api/admin?id=${slug}`, { method: 'GET' })
@@ -56,8 +66,10 @@ export default function Page() {
         } catch (error) {
             console.error('Error fetching file:', error)
             const errorMessage = error instanceof Error ? error.message : 'Failed to load file'
-            const tst: Toast = errorT(errorMessage)
-            setToast(prev => [tst, ...prev])
+            const tst = errorT(errorMessage)
+            if (tst) {
+                setToasts(prev => [tst, ...prev])
+            }
             setLoading(false)
             setErrCode(errorMessage)
         }
@@ -65,7 +77,7 @@ export default function Page() {
 
     useEffect(() => {
         fetchFile()
-    }, [])
+    }, [slug]) // Added slug as dependency
 
     // Delete file
     async function binFile(fileId: string) {
@@ -81,8 +93,10 @@ export default function Page() {
             if (!res.ok) {
                 throw new Error(data.error || 'Failed to delete file')
             }
-            const tst: Toast = success('File deleted successfully!')
-            setToast(prev => [tst, ...prev])
+            const tst = success('File deleted successfully!')
+            if (tst) {
+                setToasts(prev => [tst, ...prev])
+            }
             
             // Redirect to home or dashboard
             router.push('/drop')
@@ -90,16 +104,17 @@ export default function Page() {
         } catch (error) {
             console.error('Error deleting file:', error)
             const errorMessage = error instanceof Error ? error.message : 'Failed to delete file'
-            const tst: Toast = errorT(errorMessage)
-            setToast(prev => [tst, ...prev])
+            const tst = errorT(errorMessage)
+            if (tst) {
+                setToasts(prev => [tst, ...prev])
+            }
         } finally {
             setDeleting(false)
         }
     }
 
     const closeT = (id: string) => {
-        const newT = toast.filter(t => t.id != id)
-        setToast(newT)
+        setToasts(prev => prev.filter(t => t.id !== id)) // Fixed: comparing id, not using !=
     }
 
     // Loading state
@@ -125,7 +140,7 @@ export default function Page() {
                     <i className="p-4 rounded-sm text-destructive bg-destructive/10"><BsFileEarmarkX /></i>
                     <h2 className="text-xl font-semibold">Error fetching drop.</h2>
                     <p className="text-foreground/60 text-center">
-                        {errCode}
+                        {errCode || 'File not found'}
                     </p>
                     <Link href="/" className="text-primary hover:underline text-sm">
                         Return to home
@@ -137,7 +152,7 @@ export default function Page() {
 
     return (
         <div className="w-full flex min-h-[100dvh] items-center justify-center px-4 py-24">
-            <ToastContainer toasts={toast} onClose={closeT} />
+            <ToastContainer toasts={toasts} onClose={closeT} />
             <div className="w-full max-w-3xl rounded-xl border flex flex-col items-center justify-center bg-secondary/50 shadow-lg">
                 <div className="flex gap-4 items-center w-full justify-between border-b p-6">
                     <div className="flex items-center gap-2 text-primary text-sm">
@@ -219,4 +234,4 @@ export default function Page() {
             </div>            
         </div>
     )
-}
+    }
