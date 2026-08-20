@@ -115,7 +115,7 @@ export default function Page() {
 
             // Direct download using anchor tag
             const link = document.createElement('a')
-            link.href = data.download_url
+            // link.href = data.download_url
             link.download = data.filename
             document.body.appendChild(link)
             link.click()
