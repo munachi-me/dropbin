@@ -15,13 +15,15 @@ interface FileData {
     expires_at: string | null
     password: string | null
     created_at: string
+    updated_at: string
     status: string
 }
 
 interface FileResponse {
-    id: string
+    file_id: string  // Keep consistent with database
     admin_id: string
     name: string
+    filename?: string
     size: number
     type: string
     download_limit: number | null
@@ -29,13 +31,14 @@ interface FileResponse {
     expires_at: string | null
     has_password: boolean
     created_at: string
-    password?: string
+    password?: string  // Only include if explicitly requested and authenticated
 }
 
 export async function GET(request: Request): Promise<NextResponse> {
     try {
         const { searchParams } = new URL(request.url)
         const id = searchParams.get('id')
+        const includePassword = searchParams.get('include_password') === 'true' // Optional flag
 
         // Validate ID
         if (!id) {
@@ -45,7 +48,7 @@ export async function GET(request: Request): Promise<NextResponse> {
             )
         }
 
-        // Validate ID format (optional - adjust based on your ID format)
+        // Validate ID format (adjust based on your ID format)
         if (id.length < 8 || id.length > 64) {
             return NextResponse.json(
                 { error: 'Invalid admin ID format' },
@@ -57,7 +60,7 @@ export async function GET(request: Request): Promise<NextResponse> {
         const { data: file, error }: { 
             data: FileData | null, 
             error: PostgrestError | null 
-        } = await supabase.client
+        } = await supabase
             .from('files')
             .select(`
                 file_id,
@@ -71,17 +74,18 @@ export async function GET(request: Request): Promise<NextResponse> {
                 expires_at,
                 password,
                 created_at,
+                updated_at,
                 status
             `)
             .eq('admin_id', id)
-            .single()
+            .maybeSingle() // Use maybeSingle instead of single to avoid PGRST116 error
 
         // Handle database errors
         if (error) {
             console.error('Database error:', error)
             
             // Check if it's a "not found" error
-            if (error.code === 'PGRST116') {
+            if (error.code === 'PGRST116' || error.message?.includes('not found')) {
                 return NextResponse.json(
                     { error: 'Drop not found' },
                     { status: 404 }
@@ -99,6 +103,17 @@ export async function GET(request: Request): Promise<NextResponse> {
             return NextResponse.json(
                 { error: 'Drop not found' },
                 { status: 404 }
+            )
+        }
+
+        // Check if file is deleted or inactive
+        if (file.status === 'deleted' || file.status === 'inactive') {
+            return NextResponse.json(
+                { 
+                    error: 'This drop has been deleted',
+                    status: file.status
+                },
+                { status: 410 }
             )
         }
 
@@ -129,9 +144,10 @@ export async function GET(request: Request): Promise<NextResponse> {
 
         // Prepare response data
         const responseData: FileResponse = {
-            id: file.file_id,
+            file_id: file.file_id,
             admin_id: file.admin_id,
             name: file.name,
+            filename: file.filename,
             size: file.size,
             type: file.type,
             download_limit: file.download_limit,
@@ -141,8 +157,11 @@ export async function GET(request: Request): Promise<NextResponse> {
             created_at: file.created_at,
         }
 
-        // Only include password if it exists (for admin view)
-        if (file.password) {
+        // Only include password if explicitly requested (for admin view)
+        // In production, you should never return the raw password
+        // Instead, just return has_password: true
+        if (includePassword && file.password) {
+            // You might want to hash or encrypt this in production
             responseData.password = file.password
         }
 
